@@ -67,8 +67,6 @@
   :config
   (ivy-mode 1))
 
-(global-set-key (kbd "C-M-J") 'counsel-switch-buffer)
-
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
@@ -82,7 +80,7 @@
  '(custom-safe-themes
    '("7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "32f22d075269daabc5e661299ca9a08716aa8cda7e85310b9625c434041916af" default))
  '(package-selected-packages
-   '(all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
+   '(doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -91,14 +89,10 @@
  )
 
 (use-package doom-themes)
-(load-theme 'doom-solarized-light t)
+(load-theme 'doom-solarized-light)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
-
-;; NOTE: The first time you load your configuration on a new machine, you'll need to run the following command interactively so that the mode like icons display correctly:
-;; M-x nerd-icons-install-fonts
-(use-package nerd-icons)
 
 (use-package which-key
   :init (which-key-mode)
