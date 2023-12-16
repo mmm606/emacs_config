@@ -67,6 +67,12 @@
   :config
   (ivy-mode 1))
 
+;; how to set a global key binding in vanilla emacs
+;; (global-set-key (kbd "C-M-J") 'counsel-switch-buffer)
+;; how to set a mode specific keybinding in vanilla emacs
+;; (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme)
+;; note that we will probably set key bindings in the bind or config sections of use-package or use general (a package) to set them
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
@@ -80,7 +86,7 @@
  '(custom-safe-themes
    '("7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "32f22d075269daabc5e661299ca9a08716aa8cda7e85310b9625c434041916af" default))
  '(package-selected-packages
-   '(doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
+   '(hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -89,10 +95,14 @@
  )
 
 (use-package doom-themes)
-(load-theme 'doom-solarized-light)
+(load-theme 'doom-solarized-light t)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
+
+;; NOTE: The first time you load your configuration on a new machine, you'll need to run the following command interactively so that the mode like icons display correctly:
+;; M-x nerd-icons-install-fonts
+(use-package nerd-icons)
 
 (use-package which-key
   :init (which-key-mode)
@@ -121,3 +131,60 @@
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
   
+(use-package general
+  :config
+  (general-evil-setup t)
+
+  (general-create-definer rune/leader-keys
+			  :keymaps '(normal insert visual emacs)
+ 			  :prefix "SPC"
+			  :global-prefix "C-SPC")
+  (rune/leader-keys
+   "t" '(:ignore t :which-key "toggles")
+   "tt" '(counsel-load-theme :which-key "choose theme")))
+
+;; can set bindings in big chunks like this
+;;(general-define-key
+;; "M-x" 'amx
+;; "C-s" 'counsel-grep-or-swiper)
+
+(defun rune/evil-hook()
+  (dolist (mode '(custom-mode
+		  eshell-mode
+		  git-rebase-mode
+		  erc-mode
+		  -circe-server-mode
+		  circe-chat-mode
+		  circe-query-mode
+		  term-mode))
+    (add-to-list 'evil-emacs-state-modes mode)))
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :hook (evil-mode . rune/evil-hook)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  ;; What this actually means is that if the following are turned on, wrapped text can be navigated with regular motions
+  ;; (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  ;; (evil-set-initial-state 'dashboard-mode 'normal)
+  )
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package hydra)
+  (defhydra hydra-text-scale (:timeout 4)
+    "scale text"
+    ("j" text-scale-increase "in")
+    ("k" text-scale-decrease "out")
+    ("f" nil "finished" :exit t))
