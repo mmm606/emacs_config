@@ -148,17 +148,17 @@
 ;; "M-x" 'amx
 ;; "C-s" 'counsel-grep-or-swiper)
 
-;; (defun rune/evil-hook()
-  ;; (dolist (mode '(custom-mode
-		  ;; eshell-mode
-		  ;; git-rebase-mode
-		  ;; erc-mode
-		  ;; circe-server-mode
-		  ;; circe-chat-mode
-		  ;; circe-query-mode
-		  ;; term-mode))
-    ;; (when (fboundp mode)  ; Check if the mode is defined
-      ;; (add-to-list 'evil-emacs-state-modes mode))))
+(defun rune/evil-hook()
+  (dolist (mode '(custom-mode
+		  eshell-mode
+		  git-rebase-mode
+		  erc-mode
+		  circe-server-mode
+		  circe-chat-mode
+		  circe-query-mode
+		  term-mode))
+    (when (fboundp mode)  ; Check if the mode is defined
+      (add-to-list 'evil-emacs-state-modes mode))))
 
 (use-package evil
   :init
@@ -166,7 +166,7 @@
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
-  ;; :hook (evil-mode . rune/evil-hook)
+  :hook (evil-mode . rune/evil-hook)
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
