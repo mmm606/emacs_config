@@ -86,7 +86,7 @@
  '(custom-safe-themes
    '("7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "32f22d075269daabc5e661299ca9a08716aa8cda7e85310b9625c434041916af" default))
  '(package-selected-packages
-   '(evil-magit magit counsel-projectile projectile hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
+   '(forge evil-magit magit counsel-projectile projectile hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -211,3 +211,9 @@
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (evil-collection-magit-setup)
+
+(use-package forge
+  :after magit
+  :config
+  (setq auth-sources '("~/.authinfo")))
+;; https://magit.vc/manual/ghub/Storing-a-Token.html
