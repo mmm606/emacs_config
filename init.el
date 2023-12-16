@@ -86,7 +86,7 @@
  '(custom-safe-themes
    '("7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "32f22d075269daabc5e661299ca9a08716aa8cda7e85310b9625c434041916af" default))
  '(package-selected-packages
-   '(hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
+   '(evil-magit magit counsel-projectile projectile hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -191,3 +191,24 @@
     ("f" nil "finished" :exit t))
 (rune/leader-keys
   "ts" '(hydra-text-scale/body :which-key "scale text"))
+
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy))
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  (when (file-directory-p "~/Projects/Code")
+    (setq projectile-project-search-path '("~/Projects/Code")))
+  (setq projectile-switch-project-action #'projectile-dired))
+
+(use-package counsel-projectile
+  :config (counsel-projectile-mode))
+
+(use-package magit
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+;; (use-package evil-magit
+  ;; :after magit)
