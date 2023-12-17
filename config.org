@@ -1,3 +1,12 @@
+#+title My Emacs config
+#+PROPERTY: header-args:emacs-lisp :tangle ./init-new.el
+
+* My Emacs Config
+  #+begin_src emacs-lisp
+  ;; This is writing to new-init.el not my real init.el (from org!)
+  #+end_src
+** Set up basic settings
+#+begin_src emacs-lisp
 
 (setq inhibit-startup-message t)
 
@@ -26,7 +35,10 @@
 
 ;; Make ESC quit prompts
 ;; (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
+#+end_src
+** Prep Package manager
+#+begin_src emacs-lisp
+   
 ;; Initialize package sources
 (require 'package)
 
@@ -44,6 +56,9 @@
 
 (require 'use-package)
 (setq use-package-always-ensure t)
+#+end_src
+** Add desired packages
+#+begin_src emacs-lisp
 
 (use-package command-log-mode)
 
@@ -236,6 +251,9 @@
   (setq org-ellipsis " ▾"
 	;; org-hide-emphasis-markers t
 	)
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
   (setq org-agenda-files '("~/.emacs.d/tasks.org"))
   )
 
@@ -252,3 +270,41 @@
 
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
+
+(require 'org-tempo)
+;; don't ask for permission to run each time
+(setq org-confirm-babel-evaluate nil)
+
+;; now if we type <el and hit tab, we will get an emacs-lisp code block
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("py" . "src python"))
+
+#+end_src
+** Org Mode
+   Automatically tangle out our emacs.org config file when we save it:
+   #+begin_src emacs-lisp
+  (defun efs/org-babel-tangle-config ()
+(when (string-equal (buffer-file-name)
+(expand-file-name "~/.emacs.d/config.org"
+
+(let ((org-confirm-babel-eval nil))
+(org-babel-tagnle)))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) 
+   #+end_src
+** Applications
+*** Some App
+We can configure apps outside of emacs in org files as well
+Usually these write to a file in our directory that are symbolically linked to where the actual config should be
+
+Can save output of one block and use that in another!
+#+NAME: the-value
+#+begin_src emacs-lisp
+(+ 100 55)
+#+end_src
+
+#+begin_src conf-unix :tangle .config/some-app/config :mkdirp yes :noweb yes
+
+value = <<the-value()>>
+
+#+end_src

@@ -1,0 +1,9 @@
+* Active
+** [ ] Finish documentation
+   SCHEDULED: <2023-12-18 Mon>
+** [ ] Merge the PR
+
+* Backlog 
+  
+
+We can run org agenda to start a weekly agenda
