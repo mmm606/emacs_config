@@ -25,7 +25,7 @@
 
 
 ;; Make ESC quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+;; (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Initialize package sources
 (require 'package)
@@ -86,7 +86,7 @@
  '(custom-safe-themes
    '("7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "32f22d075269daabc5e661299ca9a08716aa8cda7e85310b9625c434041916af" default))
  '(package-selected-packages
-   '(forge evil-magit magit counsel-projectile projectile hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
+   '(visual-fill-column forge evil-magit magit counsel-projectile projectile hydra evil-collection general all-the-icons doom-themes helpful ivy-rich which-key rainbow-delimiters counsel doom-modeline use-package ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -141,7 +141,12 @@
 			  :global-prefix "C-SPC")
   (rune/leader-keys
    "t" '(:ignore t :which-key "toggles")
-   "tt" '(counsel-load-theme :which-key "choose theme")))
+   "tt" '(counsel-load-theme :which-key "choose theme"))
+
+  (rune/leader-keys
+   "b" '(:ignore t :which-key "buffer")
+   "bb" '(switch-to-buffer :which-key "choose buffer"))
+  )
 
 ;; can set bindings in big chunks like this
 ;;(general-define-key
@@ -217,3 +222,32 @@
   :config
   (setq auth-sources '("~/.authinfo")))
 ;; https://magit.vc/manual/ghub/Storing-a-Token.html
+
+(defun efs/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  ;; (setq evil-auto-indent nil)
+  )
+
+(use-package org
+  :config
+  (setq org-ellipsis " ▾"
+	;; org-hide-emphasis-markers t
+	)
+  )
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 100
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :hook (org-mode . efs/org-mode-visual-fill))
