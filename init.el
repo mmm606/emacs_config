@@ -1,3 +1,6 @@
+
+;; Get rid of old looking defaults and set some basic visual stuff
+
 (setq inhibit-startup-message t)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
@@ -20,6 +23,8 @@
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+;; Make sure we have melpa and can use-package + set up use-package
+
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -34,7 +39,7 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-
+;; get evil keybindings
 
 (use-package evil
 	     :init
@@ -64,6 +69,8 @@
  ;; If there is more than one, they won't work right.
  )
 
+;; Lets change the look of things
+
 (use-package doom-themes)
 (load-theme 'doom-solarized-light t)
 
@@ -79,21 +86,22 @@
 ;; M-x nerd-icons-install-fonts
 (use-package nerd-icons)
 
+;; make it easier to remember shortcuts with whichkey
+
 (use-package which-key
   :init
   (which-key-mode)
   :config
   (setq which-key-idle-delay 0.1))
 
+;; Ivy will help us with autocompletion
 
 (use-package ivy
   :init
   (ivy-mode t)
   (setq ivy-use-selectable-prompt t))
 
-;; (use-package ivy-rich
-  ;; :init
-  ;; (ivy-rich-mode t))
+;; Counsel will give us descriptions of functions, and use ivy's autocompletes
 
 (use-package counsel
   :after
