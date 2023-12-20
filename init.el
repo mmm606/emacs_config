@@ -61,7 +61,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
+   '(general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -101,10 +101,56 @@
   (ivy-mode t)
   (setq ivy-use-selectable-prompt t))
 
-;; Counsel will give us descriptions of functions, and use ivy's autocompletes
+;; Counsel will give us descriptions of functions, help search through other files, and use ivy's autocompletes
 
 (use-package counsel
   :after
   ivy
   :init
   (counsel-mode t))
+
+;; swiper will let us find within a file
+
+(use-package swiper
+  :after ivy
+  :init)
+
+;; helpful will give us prettier documentation
+(use-package helpful
+  :custom
+  (council-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . helpful-key))
+
+;; general will help us do keymappings with whichkey integration
+(use-package general
+  :config
+  (general-evil-setup t)
+
+  ;; This leader is for my cross buffer actions
+  (general-create-definer mish/global-leader :prefix "SPC")
+
+  ;; lets define cross buffer keymaps
+  (mish/global-leader
+    :states '(normal visual emacs)
+    :keymaps 'override
+   "b" '(:ignore t :which-key "buffer")
+   "bs" '(switch-to-buffer :which-key "switch to buffer")
+   "bc" '(delete-window :which-key "close window")
+   "." '(find-file :which-key "open filesystem")
+   )
+
+  ;; This one is for buffer/mode specific actions
+  (general-create-definer mish/local-leader :prefix "C-SPC")
+
+  ;; lets define keymaps for local things
+  (mish/local-leader
+    :states '(normal insert visual emacs)
+    :keymaps '(override prog-mode)
+   "l" '(:ignore t :which-key "lsp")
+   )
+  )
