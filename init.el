@@ -55,13 +55,14 @@
   :after evil
   :config
   (evil-collection-init))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
+   '(lsp-pyright python-mode dap-python dap-mode lsp-ivy lsp-mode general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -142,15 +143,53 @@
    "bs" '(switch-to-buffer :which-key "switch to buffer")
    "bc" '(delete-window :which-key "close window")
    "." '(find-file :which-key "open filesystem")
+   "l" '(:ignore t :which-key "lsp")
    )
 
   ;; This one is for buffer/mode specific actions
-  (general-create-definer mish/local-leader :prefix "C-SPC")
+  ;; (general-create-definer mish/local-leader :prefix "C-SPC")
 
   ;; lets define keymaps for local things
-  (mish/local-leader
-    :states '(normal insert visual emacs)
-    :keymaps '(override prog-mode)
-   "l" '(:ignore t :which-key "lsp")
-   )
+  ;; (mish/local-leader
+    ;; :states '(normal insert visual emacs)
+    ;; :keymaps '(override prog-mode)
+   ;; "l" '(:ignore t :which-key "lsp")
+   ;; )
   )
+
+;; need to increase garbage collector threshold for lsp
+(setq gc-cons-threshold 100000000)
+;; some of the language server responses are in 800k - 3M range
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
+
+(use-package lsp-mode
+  :init
+  (setq lsp-keymap-prefix " l")
+  (setq lsp-modeline-diagnostics-enable t)
+  (setq lsp-modeline-diagnostics-scope :workspace)
+  (setq lsp-headerline-breadcrumb-mode t)
+  :config
+  (lsp-enable-which-key-integration t)
+  :commands lsp)
+
+;; integrate lsp with ivy
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+;; optionally if you want to use debugger
+(use-package dap-mode)
+;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+;; set up language server
+(use-package python-mode
+  :mode "\\.py\\'"
+  :hook (python-mode . lsp-deferred)
+  :config
+  (setq python-indent-level 2))
+
+;; (use-package lsp-pyright
+  ;; :hook (python-mode . lsp-pyright)) 
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+			 (require 'lsp-pyright)
+			 (lsp-deferred))))
