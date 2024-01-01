@@ -62,7 +62,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(lsp-pyright python-mode dap-python dap-mode lsp-ivy lsp-mode general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
+   '(evil-nerd-commenter lsp-ui company-box company lsp-pyright python-mode dap-python dap-mode lsp-ivy lsp-mode general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -193,3 +193,27 @@
   :hook (python-mode . (lambda ()
 			 (require 'lsp-pyright)
 			 (lsp-deferred))))
+
+;; Nicer UI for lsp completions
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+;; make the company completion box look nicer
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom (lsp-ui-doc-position 'at-point)
+  )
+
+(use-package evil-nerd-commenter
+  :bind ("C-/" . evilnc-comment-or-uncomment-lines))
