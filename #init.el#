@@ -180,7 +180,7 @@
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 
 ;; set up language server
-(use-package python-mode
+(use-package python-ts-mode
   :custom (python-shell-interpreter "python3")
   :mode "\\.py\\'"
   :hook (python-mode . lsp-deferred)
