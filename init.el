@@ -62,7 +62,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(evil-nerd-commenter lsp-ui company-box company lsp-pyright python-mode dap-python dap-mode lsp-ivy lsp-mode general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
+   '(treesit-auto evil-nerd-commenter lsp-ui company-box company lsp-pyright python-mode dap-python dap-mode lsp-ivy lsp-mode general helpful ivy-rich counsel ivy which-key doom-modeline nerd-icons rainbow-delimiters doom-themes evil-collection evil use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -100,8 +100,13 @@
 (use-package ivy
   :init
   (ivy-mode t)
-  (setq ivy-use-selectable-prompt t))
-
+  (setq ivy-use-selectable-prompt t)
+  :bind
+  (:map ivy-minibuffer-map
+	("C-j" . ivy-next-line-or-history)
+	("C-k" . ivy-previous-line-or-history)
+	)
+  )
 ;; Counsel will give us descriptions of functions, help search through other files, and use ivy's autocompletes
 
 (use-package counsel
@@ -162,6 +167,14 @@
 ;; some of the language server responses are in 800k - 3M range
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
+;; automatically install treesitter grammars
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install t)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
 (use-package lsp-mode
   :init
   (setq lsp-keymap-prefix " l")
@@ -179,19 +192,9 @@
 (use-package dap-mode)
 ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 
-;; set up language server
-(use-package python-mode
-  :custom (python-shell-interpreter "python3")
-  :mode "\\.py\\'"
-  :hook (python-mode . lsp-deferred)
-  :config
-  (setq python-indent-level 2))
-
-;; (use-package lsp-pyright
-  ;; :hook (python-mode . lsp-pyright)) 
 (use-package lsp-pyright
   :ensure t
-  :hook (python-mode . (lambda ()
+  :hook (python-base-mode . (lambda ()
 			 (require 'lsp-pyright)
 			 (lsp-deferred))))
 
