@@ -48,8 +48,16 @@
 	     (setq evil-want-C-i-jump nil)
 	     (setq evil-want-C-d-scroll nil)
 	     (setq evil-want-Y-yank-to-eol t)
+	     (setq evil-undo-system 'undo-redo)
+	     (setq evil-want-fine-undo t)
 	     :config
 	     (evil-mode 1))
+
+;; make deletions go into the d register. To paste them do: "dp
+;; (defun mish/evil-delete (orig-fn beg end &optional type _ &rest args)
+;;   (apply orig-fn beg end type ?_ args))
+
+;; (advice-add 'evil-delete :around 'mish/evil-delete)
 
 (use-package evil-collection
   :after evil
@@ -100,6 +108,7 @@
 (use-package ivy
   :init
   (ivy-mode t)
+  ;; (setq ivy-mode-map nil) ;; stops ivy from making its keybinds
   (setq ivy-use-selectable-prompt t)
   :bind
   (:map ivy-minibuffer-map
@@ -114,6 +123,11 @@
   ivy
   :init
   (counsel-mode t))
+
+(use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
+(setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
 
 ;; swiper will let us find within a file
 
@@ -133,6 +147,17 @@
   ([remap describe-key] . helpful-key))
 
 ;; general will help us do keymappings with whichkey integration
+(defun mish/paste-from-zero-reg-before (count &optional yank-handler)
+  (interactive "p")
+  (dotimes (_ count)
+    (evil-paste-before 1 ?0 yank-handler)))
+
+
+(defun mish/paste-from-zero-reg-after (count &optional yank-handler)
+  (interactive "p")
+  (dotimes (_ count)
+    (evil-paste-after 1 ?0 yank-handler)))
+
 (use-package general
   :config
   (general-evil-setup t)
@@ -150,7 +175,12 @@
    "." '(find-file :which-key "open filesystem")
    "l" '(:ignore t :which-key "lsp")
    )
-
+  (general-define-key
+   :states '(normal visual)
+   :keymaps 'evil-normal-state-map
+   "p" 'mish/paste-from-zero-reg-before
+   "P" 'mish/paste-from-zero-reg-after
+   )
   ;; This one is for buffer/mode specific actions
   ;; (general-create-definer mish/local-leader :prefix "C-SPC")
 
