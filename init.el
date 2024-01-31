@@ -23,6 +23,10 @@
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(setq scroll-margin 8)
+(setq hscroll-margin 8)
+(setq scroll-conservatively 1000)
+
 ;; Make sure we have melpa and can use-package + set up use-package
 
 (require 'package)
@@ -148,6 +152,26 @@
 
 ;; general will help us do keymappings with whichkey integration
 
+;; (defvar mish/personal-config-dir (file-name-directory (load-file-name)))
+
+(defun mish/personal-config-dir ()
+  "This function will get the directory that the user's init file is in"
+  (interactive)
+  (if-let (
+	   (is-bound (boundp 'chemacs-profile))
+	   (its-assoc (assoc 'user-emacs-directory chemacs-profile))
+	   )
+	(cdr its-assoc)
+      (file-name-directory user-init-file)
+      )
+  )
+
+(defun mish/open-personal-config-dir ()
+  "This function will open the directory of the user's init file"
+  (interactive)
+  (let ((default-directory (mish/personal-config-dir)))
+    (call-interactively 'find-file)))
+
 (use-package general
   :after evil
   :config
@@ -161,7 +185,13 @@
     :global-prefix "M-SPC"
     )
 
+  (setq mish/help-map (copy-keymap help-map))
+  (mish/global-leader-definer "h" '(:keymap mish/help-map :which-key "help"))
+
   (mish/global-leader-definer
+
+    "." '(find-file :which-key "open file system")
+
     "b" '(:ignore t :which-key "buffer")
     "bb" '(switch-to-buffer :which-key "switch to buffer")
     "bk" '(kill-buffer-and-window :which-key "kill buffer")
@@ -173,6 +203,13 @@
     "wl" '(evil-window-right :which-key "window right")
     "wc" '(evil-window-delete :which-key "close window")
     "wC" '(delete-other-windows :which-key "close all other windows")
+
+    "c" '(:ignore t :which-key "code")
+    "cd" '(xref-find-definitions :which-key "jump to definition")
+
+    "f" '(:ignore t :which-key "file")
+    "fp" '(mish/open-personal-config-dir :which-key "open personal config")
+
     )
   )
 
