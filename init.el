@@ -34,7 +34,7 @@
 (package-initialize)
 
 (unless (package-installed-p 'use-package)
-   (package-install 'use-package))
+  (package-install 'use-package))
 
 (require 'use-package)
 (setq use-package-always-ensure t)
@@ -42,16 +42,16 @@
 ;; get evil keybindings
 
 (use-package evil
-	     :init
-	     (setq evil-want-keybinding nil)
-	     (setq evil-want-integration t)
-	     (setq evil-want-C-i-jump nil)
-	     (setq evil-want-C-d-scroll nil)
-	     (setq evil-want-Y-yank-to-eol t)
-	     (setq evil-undo-system 'undo-redo)
-	     (setq evil-want-fine-undo t)
-	     :config
-	     (evil-mode 1))
+  :init
+  (setq evil-want-keybinding nil)
+  (setq evil-want-integration t)
+  (setq evil-want-C-i-jump nil)
+  (setq evil-want-C-d-scroll nil)
+  (setq evil-want-Y-yank-to-eol t)
+  (setq evil-undo-system 'undo-redo)
+  (setq evil-want-fine-undo t)
+  :config
+  (evil-mode 1))
 
 ;; make deletions go into the d register. To paste them do: "dp
 ;; (defun mish/evil-delete (orig-fn beg end &optional type _ &rest args)
@@ -147,49 +147,33 @@
   ([remap describe-key] . helpful-key))
 
 ;; general will help us do keymappings with whichkey integration
-(defun mish/paste-from-zero-reg-before (count &optional yank-handler)
-  (interactive "p")
-  (dotimes (_ count)
-    (evil-paste-before 1 ?0 yank-handler)))
-
-
-(defun mish/paste-from-zero-reg-after (count &optional yank-handler)
-  (interactive "p")
-  (dotimes (_ count)
-    (evil-paste-after 1 ?0 yank-handler)))
 
 (use-package general
+  :after evil
   :config
   (general-evil-setup t)
-
+  
   ;; This leader is for my cross buffer actions
-  (general-create-definer mish/global-leader :prefix "SPC")
-
-  ;; lets define cross buffer keymaps
-  (mish/global-leader
-    :states '(normal visual emacs)
+  (general-create-definer mish/global-leader-definer
+    :states '(normal insert visual emacs)
     :keymaps 'override
-   "b" '(:ignore t :which-key "buffer")
-   "bs" '(switch-to-buffer :which-key "switch to buffer")
-   "bc" '(delete-window :which-key "close window")
-   "." '(find-file :which-key "open filesystem")
-   "l" '(:ignore t :which-key "lsp")
-   )
-  (general-define-key
-   :states '(normal visual)
-   :keymaps 'evil-normal-state-map
-   "p" 'mish/paste-from-zero-reg-before
-   "P" 'mish/paste-from-zero-reg-after
-   )
-  ;; This one is for buffer/mode specific actions
-  ;; (general-create-definer mish/local-leader :prefix "C-SPC")
+    :prefix "SPC"
+    :global-prefix "M-SPC"
+    )
 
-  ;; lets define keymaps for local things
-  ;; (mish/local-leader
-    ;; :states '(normal insert visual emacs)
-    ;; :keymaps '(override prog-mode)
-   ;; "l" '(:ignore t :which-key "lsp")
-   ;; )
+  (mish/global-leader-definer
+    "b" '(:ignore t :which-key "buffer")
+    "bb" '(switch-to-buffer :which-key "switch to buffer")
+    "bk" '(kill-buffer-and-window :which-key "kill buffer")
+
+    "w" '(:ignore t :which-key "window")
+    "wk" '(evil-window-up :which-key "window up")
+    "wj" '(evil-window-up :which-key "window down")
+    "wh" '(evil-window-left :which-key "window left")
+    "wl" '(evil-window-right :which-key "window right")
+    "wc" '(evil-window-delete :which-key "close window")
+    "wC" '(delete-other-windows :which-key "close all other windows")
+    )
   )
 
 ;; need to increase garbage collector threshold for lsp
@@ -225,17 +209,20 @@
 (use-package lsp-pyright
   :ensure t
   :hook (python-base-mode . (lambda ()
-			 (require 'lsp-pyright)
-			 (lsp-deferred))))
+			      (require 'lsp-pyright)
+			      (lsp-deferred))))
 
 ;; Nicer UI for lsp completions
 (use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
+  ;; :after lsp-mode
+  ;; :hook
+  ;; (lsp-mode . company-mode)
+  :init
+  (global-company-mode) 
   :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
+              ("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
