@@ -166,6 +166,25 @@
       )
   )
 
+;; (defun mish/call-in-order (alist-of-func-keys-and-arg-values)
+  ;; "This function takes an alist of key values being a function and the values being a list of args. It will try to call each one in order if and only if it is bound. If it is bound and returns a truthy value then we stop and return that value"
+  ;; (cl-some
+   ;; (lambda (key-value-pair)
+     ;; (let
+	 ;; (
+	  ;; (func (car key-value-pair))
+	  ;; (args (cdr key-value-pair))
+	  ;; )
+       ;; (and
+	;; (boundp func)
+	;; (apply func args)
+	;; )
+       ;; )
+     ;; )
+   ;; alist-of-func-keys-and-arg-values
+   ;; )
+  ;; )
+
 (defun mish/open-personal-config-dir ()
   "This function will open the directory of the user's init file"
   (interactive)
