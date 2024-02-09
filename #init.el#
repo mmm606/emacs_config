@@ -209,6 +209,20 @@
   (setq mish/help-map (copy-keymap help-map))
   (mish/global-leader-definer "h" '(:keymap mish/help-map :which-key "help"))
 
+  (general-define-key
+   :states '(normal visual motion)
+   :keymaps 'lsp-mode-map
+
+  (general-create-definer mish/code-map-definer
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC c"
+    )
+  (mish/code-map-definer
+   
+    "cd" '(xref-find-definitions :which-key "jump to definition")
+   )
+
   (mish/global-leader-definer
 
     "." '(find-file :which-key "open file system")
@@ -225,8 +239,8 @@
     "wc" '(evil-window-delete :which-key "close window")
     "wC" '(delete-other-windows :which-key "close all other windows")
 
-    "c" '(:ignore t :which-key "code")
-    "cd" '(xref-find-definitions :which-key "jump to definition")
+    ;;"c" '(mish/code-map-definer :which-key "code")
+    ;; "cd" '(xref-find-definitions :which-key "jump to definition")
 
     "f" '(:ignore t :which-key "file")
     "fp" '(mish/open-personal-config-dir :which-key "open personal config")
@@ -234,7 +248,8 @@
     "p" '(:ignore t :which-key "pop up")
     "pm" '(view-echo-area-messages :which-key "view messages")
 
-    )
+    
+)
   )
 
 ;; need to increase garbage collector threshold for lsp
