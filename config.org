@@ -1,5 +1,6 @@
 #+title My Emacs config
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el
+;; #+PROPERTY: header-args:emacs-lisp :tangle ./init.el
+#+PROPERTY: header-args:emacs-lisp :tangle yes
 
 * My Emacs Config
 ** Basic Settings
@@ -582,16 +583,18 @@ TODO: bind consult-imenu for searching headers in org mode
 
 ** Literate Config Settings
 Automatically tangle out our emacs.org config file when we save it:
+Disabled because we tanlge this file on startup rather than on save now
 #+begin_src emacs-lisp
 
-  (defun rune/org-babel-tangle-config ()
-    (when (string-equal (buffer-file-name)
-			(expand-file-name "~/.emacs.d/config.org"))
+  ;; (defun rune/org-babel-tangle-config ()
+  ;;   (when (string-equal (buffer-file-name)
+  ;; 		      (expand-file-name "~/.emacs.d/config.org"))
 
-      (let ((org-confirm-babel-eval nil))
-	(org-babel-tangle))))
+  ;;     (let ((org-confirm-babel-eval nil))
+  ;;       (org-babel-tangle))))
 
-  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'rune/org-babel-tangle-config))) 
+  ;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'rune/org-babel-tangle-config)))
+
 
 #+end_src
 ** LSP Related Config
