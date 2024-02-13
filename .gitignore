@@ -1,0 +1,25 @@
+# Backup files
+*~
+\#*\#
+
+# Auto-save list
+auto-save-list/
+
+# Transient files
+tramp
+.\#*
+
+# Compiled source files
+*.elc
+
+# Other generated files
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# caches, save directories, and package save directories
+eln-cache/
+elpa/
+history
+projectile-bookmarks.eld
+transient
+tree-sitter
