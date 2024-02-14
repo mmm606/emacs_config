@@ -182,26 +182,23 @@ TODO: use consult-project-buffer in my keymap!
 We will rebind the default commands to the enhanced consult ones
 #+begin_src emacs-lisp
 
-  (use-package consult
-    :bind
-    (([remap bookmark-jump]                 . consult-bookmark)
-     ([remap evil-show-marks]               . consult-mark)
-     ([remap evil-show-jumps]               . +vertico/jump-list)
-     ([remap evil-show-registers]           . consult-register)
-     ([remap goto-line]                     . consult-goto-line)
-     ([remap imenu]                         . consult-imenu)
-     ([remap Info-search]                   . consult-info)
-     ([remap locate]                        . consult-locate)
-     ([remap load-theme]                    . consult-theme)
-     ([remap man]                           . consult-man)
-     ([remap recentf-open-files]            . consult-recent-file)
-     ([remap switch-to-buffer]              . consult-buffer)
-     ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-     ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
-     ([remap yank-pop]                      . consult-yank-pop)
-     ([remap persp-switch-to-buffer]        . +vertico/switch-workspace-buffer))
-    :config
-    (setq consult-project-function (lambda (_) (projectile-project-root))))
+      (use-package consult
+	:bind
+	(([remap switch-to-buffer] . consult-buffer)
+	 ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+	 ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+	 ([remap yank-pop] . consult-yank-pop)
+	 ([remap goto-line] . consult-goto-line)
+	 ([remap imenu] . consult-imenu)
+	 ([remap load-theme] . consult-theme)
+	 ([remap bookmark-jump] . consult-bookmark)
+	 ([remap locate] . consult-locate)
+	 ([remap recentf-open-files] . consult-recent-file)
+	 ([remap evil-show-marks] . consult-mark)
+	 ([remap man] . consult-man))
+	;; :config
+	;; TODO: (setq consult-project-function (lambda (_) (projectile-project-root)))
+	)
 
 #+end_src
 *** embark for in buffer actions
@@ -320,6 +317,13 @@ Otherwise use the default `completion--in-region' function.
   (define-key vertico-map (kbd "DEL") #'vertico-directory-delete-char)
 
 #+end_src
+**** Change the bindings in vertico
+#+begin_src emacs-lisp
+  
+  (keymap-set vertico-map "C-j" #'vertico-next)
+  (keymap-set vertico-map "C-k" #'vertico-previous)
+
+#+end_src
 ** modeline
 #+begin_src emacs-lisp
 
@@ -347,15 +351,13 @@ Otherwise use the default `completion--in-region' function.
 #+end_src
 ** helpful
 #+begin_src emacs-lisp
-  
+
   (use-package helpful
-    :custom
-    (council-describe-function-function #'helpful-callable)
-    (counsel-describe-variable-function #'helpful-variable)
     :bind
-    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-symbol] . helpful-symbol)
+    ([remap describe-variable] . helpful-variable)
+    ([remap describe-function] . helpful-callable)
     ([remap describe-command] . helpful-command)
-    ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 
 #+end_src
@@ -434,7 +436,7 @@ TODO: move keybindings out of here
     (rune/leader-keys
       ;; :keymaps 'rune/toggle-keymap
       "t" '(:ignore t :which-key "toggles")
-      "tt" '(counsel-load-theme :which-key "choose theme")
+      "tt" '(consult-theme :which-key "choose theme")
       "ts" '(hydra-text-scale/body :which-key "scale text"))
 
     (defvar-keymap rune/insert-keymap)
