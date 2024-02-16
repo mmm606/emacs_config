@@ -6,24 +6,31 @@
 ** Basic Settings
 *** lexical binding
 #+begin_src emacs-lisp
-;;; -*- lexical-binding: t; -*-
+
+  ;;; -*- lexical-binding: t; -*-
+
 #+end_src
 *** inhibit startup message
 #+begin_src emacs-lisp
+
   (setq inhibit-startup-message t)
+
 #+end_src
 *** disable scrollbar, toolbar, tooltips, and menu bar
 #+begin_src emacs-lisp
+
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
   (tooltip-mode -1)
 
   (menu-bar-mode -1)
+
 #+end_src
 *** make space between edge and text
 #+begin_src emacs-lisp
-  
+
   (set-fringe-mode 10)
+
 #+end_src
 *** visual bell instead of beep
 #+begin_src emacs-lisp
@@ -75,13 +82,17 @@
 #+end_src
 *** all packages should be ensured by default
 #+begin_src emacs-lisp
+
   (setq use-package-always-ensure t)
+
 #+end_src
 ** add theme
 #+begin_src emacs-lisp
+
   (use-package doom-themes
     :init
     (load-theme 'doom-solarized-light t))
+
 #+end_src
 ** Set Up Evil Mode
 *** evil mode
@@ -119,6 +130,8 @@
 
 #+end_src
 ** In Emacs Completion Framwork - Vertico
+*** what is vertico?
+Vertico is a minibuffer completion framework. So when you look for files, buffers, functions, or anything in the minibuffer it will give you suggestions.
 *** vertico as recommended on the github
 #+begin_src emacs-lisp
 
@@ -177,62 +190,109 @@ Vertico sorts by history position
     (setq enable-recursive-minibuffers t))
 
 #+end_src
-*** consult
-TODO: use consult-project-buffer in my keymap!
+*** Consult
+**** what is consult?
+Consult provides better searching with things like grep, ripgrep, a better buffer switching interface, recent file/command history. It can help create shortcuts for narrowing
+search results down to the desired candidates.
+**** setup
+TODO: use consult-project-buffer in my keymap! add to projectile to consult-project-buffer-sources
+TODO: experiment with the kill ring stuff for more powerful copy and paste. Also try the register stuff
+TODO: add consult-line-multi to buffer map bc it lets you search but only through open buffers
+TODO: add consult-find, or consult-fd, or consult-locate. These will fuzzy find files
+TODO: add these compile/spell checking things: https://github.com/minad/consult?tab=readme-ov-file#compilation
+TODO: try the org agenda ones: https://github.com/minad/consult?tab=readme-ov-file#org-mode
+TODO: add consult-mode-command to "SPC M-x" so you can look at commands that are active right now in open major and minor modes
 We will rebind the default commands to the enhanced consult ones
 #+begin_src emacs-lisp
 
-      (use-package consult
-	:bind
-	(([remap switch-to-buffer] . consult-buffer)
-	 ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-	 ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
-	 ([remap yank-pop] . consult-yank-pop)
-	 ([remap goto-line] . consult-goto-line)
-	 ([remap imenu] . consult-imenu)
-	 ([remap load-theme] . consult-theme)
-	 ([remap bookmark-jump] . consult-bookmark)
-	 ([remap locate] . consult-locate)
-	 ([remap recentf-open-files] . consult-recent-file)
-	 ([remap evil-show-marks] . consult-mark)
-	 ([remap man] . consult-man))
-	;; :config
-	;; TODO: (setq consult-project-function (lambda (_) (projectile-project-root)))
-	)
+  (use-package consult
+    :bind
+    (([remap switch-to-buffer] . consult-buffer)
+     ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+     ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+     ([remap yank-pop] . consult-yank-pop)
+     ([remap goto-line] . consult-goto-line)
+     ([remap imenu] . consult-imenu)
+     ([remap load-theme] . consult-theme)
+     ([remap bookmark-jump] . consult-bookmark)
+     ([remap locate] . consult-locate)
+     ([remap recentf-open-files] . consult-recent-file)
+     ([remap evil-show-marks] . consult-mark)
+     ([remap man] . consult-man)
+     ([remap evil-show-registers] . consult-register)
+     ([remap Info-search] . consult-info)
+     ;; new ones I infered from the github
+     ([remap repeat-complex-command] . consult-complex-command)
+     ([remap project-switch-to-buffer] . consult-project-buffer)
+     ([remap isearch-edit-string] . consult-isearch-history)
+     ([remap next-matching-history-element] . consult-history)
+     ([remap previous-matching-history-element] . consult-history)
+     )
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+
+    :init
+
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+	  register-preview-function #'consult-register-format)
+
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
+
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+	  xref-show-definitions-function #'consult-xref)
+
+    :config
+
+    ;; if which-key is installed this will trigger it to help
+    (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+    ;; TODO:
+    ;; (autoload 'projectile-project-root "projectile")
+    ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+    )
 
 #+end_src
-*** embark for in buffer actions
+*** Embark
+**** what is embark?
+Embark basically allows "right click" like contextual options. It can act on consult/vertico suggestions and gives you options to do something to what you are hovering.
+**** setup
+TODO: read more on the github to check for additional features
 #+begin_src emacs-lisp
+  (use-package embark
+    :ensure t
 
-    (use-package embark
-      :ensure t
+    :bind
+    (("C-." . embark-act)         ;; pick some comfortable binding
+     ("M-." . embark-dwim)        ;; runs default action on selection
+     ("C-h B" . embark-bindings)
+     )
 
-      :bind
-      (("C-." . embark-act)         ;; pick some comfortable binding
-       ("M-." . embark-dwim)        ;; runs default action on selection
-       ("C-h B" . embark-bindings)
-       ;; ([remap describe-bindings] . embark-bindings)
-       )
+    :init
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
 
-      :init
-      ;; Optionally replace the key help with a completing-read interface
-      (setq prefix-help-command #'embark-prefix-help-command)
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+		 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		   nil
+		   (window-parameters (mode-line-format . none)))))
 
-      :config
-      ;; Hide the mode line of the Embark live/completions buffers
-      (add-to-list 'display-buffer-alist
-		   '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-		     nil
-		     (window-parameters (mode-line-format . none)))))
-
-    ;; Consult users will also want the embark-consult package.
-    (use-package embark-consult
-      :hook
-      (embark-collect-mode . consult-preview-at-point-mode))
+  ;; Consult users will also want the embark-consult package.
+  (use-package embark-consult
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
 
 #+end_src
 *** marginalia
-Enable rich annotations using the Marginalia package
+Enable rich annotations using the Marginalia package. Tip: M-x customize-variable in order to see all variables you can change from a particular package
 #+begin_src emacs-lisp
 
   (use-package marginalia
@@ -430,7 +490,7 @@ TODO: move keybindings out of here
     (rune/leader-keys
       ;; :keymaps 'rune/toggle-keymap
       "." '(find-file :which-key "open file system")
-      "/" '(consult-ripgrep))
+      "/" '(consult-ripgrep :which-key "search accross files"))
 
     (defvar-keymap rune/toggle-keymap)
     (rune/leader-keys
@@ -493,6 +553,7 @@ TODO: move keybindings out of here
 ** projectile
 TODO: get this going
 TODO: move this higher because things rely on this
+TODO: investigate further: https://github.com/bbatsov/projectile?tab=readme-ov-file https://docs.projectile.mx/projectile/index.html 
 #+begin_src emacs-lisp
 
   ;; (use-package projectile
@@ -521,11 +582,11 @@ TODO: move this higher because things rely on this
 TODO: get this going
 #+begin_src emacs-lisp
 
-    (use-package forge
-      :after magit
-      :config
-      (setq auth-sources '("~/.authinfo")))
-    ;; https://magit.vc/manual/ghub/Storing-a-Token.html
+  (use-package forge
+    :after magit
+    :config
+    (setq auth-sources '("~/.authinfo")))
+  ;; https://magit.vc/manual/ghub/Storing-a-Token.html
 #+end_src
 ** Org Mode
 TODO: bind consult-imenu for searching headers in org mode
@@ -626,12 +687,11 @@ Here we are making it 1 mb
 
 #+end_src
 *** lsp-mode
-TODO: incorporate new completions framework with lsp-mode again like: ;; TODO: (use-package lsp-ivy :commands lsp-ivy-workspace-symbol
+TODO: incorporate new completions framework with lsp-mode again like: ;; TODO: (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 #+begin_src emacs-lisp
 
   (use-package lsp-mode
     :init
-    (setq lsp-keymap-prefix " l")
     (setq lsp-modeline-diagnostics-enable t)
     (setq lsp-modeline-diagnostics-scope :workspace)
     (setq lsp-headerline-breadcrumb-mode t)
@@ -686,10 +746,9 @@ Make the company completion box look nicer
 
 #+end_src
 *** Language Specific Configurations
-***** Python
+**** Python
 ****** set up pyright
 #+begin_src emacs-lisp
-
 
   (use-package lsp-pyright
     :ensure t
@@ -697,7 +756,57 @@ Make the company completion box look nicer
 				(require 'lsp-pyright)
 				(lsp-deferred))))
 
+#+end_src
 
+**** Ocaml
+***** tuareg
+Tuareg: an Emacs OCaml mode
+This archive contains files to help editing OCaml code, to highlight important parts of the code, to run an OCaml REPL (also called toplevel), and to run the OCaml debugger within Emacs.
+TODO: (map! :localleader
+        :map tuareg-mode-map
+        "a" #'tuareg-find-alternate-file)
+#+begin_src emacs-lisp
 
+    (use-package tuareg
+      :hook ('tuareg-mode-hook . 
+			       (lambda()
+				 ;; more idomatic comments
+				 (setq-local comment-style 'multi-line)
+				 (setq-local comment-continue "   ")
+				 (tree-sitter)
+				 (lsp-deferred)
+				 ;; liagatures
+				 (when (functionp 'prettify-symbols-mode)
+				   (prettify-symbols-mode))))
+      ;; Ocaml has quirky comments
+      :bind (:map tuareg-mode-map ("C-/" . tuareg-comment-dwim))
+      :config
+      (setq tuareg-prettify-symbols-full t)
+      (setq tuareg-opam-insinuate t)
+      (tuareg-opam-update-env (tuareg-opam-current-compiler))
+      )
+
+#+end_src
+***** merlin
+Provides modern IDE features to editors
+#+begin_src emacs-lisp
+  (use-package merlin-company)
+  (use-package merlin-iedit)
+
+  (use-package merlin
+    :config
+    (push "<SHARE_DIR>/emacs/site-lisp" load-path) ; directory containing merlin.el
+    (setq merlin-command "<BIN_DIR>/ocamlmerlin")  ; needed only if ocamlmerlin not already in your PATH
+    (autoload 'merlin-mode "merlin" "Merlin mode" t)
+    (add-hook 'tuareg-mode-hook #'merlin-mode)
+    (add-hook 'caml-mode-hook #'merlin-mode)
+    ;; Uncomment these lines if you want to enable integration with the corresponding packages
+    (require 'merlin-iedit)       ; iedit.el editing of occurrences
+    (require 'merlin-company)     ; company.el completion
+    ;; (require 'merlin-ac)          ; auto-complete.el completion
+    ;; To easily change opam switches and pick the ocamlmerlin binary accordingly,
+    ;; you can use the minor mode https://github.com/ProofGeneral/opam-switch-mode
+    :hook (tuareg-mode-local-vars . (lambda () (when (executable-find "ocamlmerlin") (merlin-mode))))
+    )
 
 #+end_src
