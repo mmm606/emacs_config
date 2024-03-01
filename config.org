@@ -537,6 +537,8 @@ TODO: move keybindings out of here
       ;; :keymaps 'rune/code-keymap
       "c" '(:ignore t :which-key "code")
       "cd" '(xref-find-definitions :which-key "jump to definition"))
+    ;; TODO: note: can just redefine keys set here using lsp-mode-map bc it basically has nothing in it usually
+    ;; TODO: make it so that spc c / will search for symbols and spc c C-f will do it for just this file
 
     (defvar-keymap rune/file-keymap)
     (rune/leader-keys
@@ -810,6 +812,13 @@ TODO: incorporate new completions framework with lsp-mode again like: ;; TODO: (
 #+end_src
 *** Integrate with consult
 TODO: https://github.com/gagbo/consult-lsp
+#+begin_src emacs-lisp
+
+  ;; (use-package consult-lsp
+  ;;   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+
+
+#+end_src
 *** lsp ui
 Make the lsp interactions happen in a nice looking hovering box instead of minibuffer
 #+begin_src emacs-lisp
@@ -855,6 +864,7 @@ Make the company completion box look nicer
     :hook (company-mode . company-box-mode))
 
 #+end_src
+*** TODO: Flycheck instead of flymake?
 *** Language Specific Configurations
 **** Python
 ****** set up pyright
