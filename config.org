@@ -121,6 +121,12 @@
 	(setq forge-add-default-bindings nil))
 
 #+end_src
+** allow recent files
+#+begin_src emacs-lisp
+
+  (recentf-mode 1) 
+
+#+end_src
 
 ** nerd icons
 *NOTE: The first time you load your configuration on a new machine, you'll need to run the following command interactively so that the mode like icons display correctly: M-x nerd-icons-install-fonts*
@@ -135,20 +141,22 @@ Vertico is a minibuffer completion framework. So when you look for files, buffer
 *** vertico as recommended on the github
 #+begin_src emacs-lisp
 
-  (use-package vertico
-    :init
-    (vertico-mode)
+      (use-package vertico
+	:init
+	(vertico-mode)
 
-    (setq vertico-scroll-margin 2)
+	(setq vertico-scroll-margin 2)
 
-    ;; Show more candidates
-    (setq vertico-count 20)
+	;; Show more candidates
+	(setq vertico-count 20)
 
-    ;; Grow and shrink the Vertico minibuffer
-    (setq vertico-resize t)
+	;; Grow and shrink the Vertico minibuffer
+	(setq vertico-resize t)
 
-    ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-    (setq vertico-cycle t))
+	;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+	(setq vertico-cycle t)
+	(define-key vertico-map (kbd "C-j") nil)
+	)
 
 #+end_src
 *** save history for completions when emacs restarts
@@ -380,8 +388,8 @@ Otherwise use the default `completion--in-region' function.
 **** Change the bindings in vertico
 #+begin_src emacs-lisp
   
-  (keymap-set vertico-map "C-j" #'vertico-next)
-  (keymap-set vertico-map "C-k" #'vertico-previous)
+  (keymap-set vertico-map "M-j" #'vertico-next)
+  (keymap-set vertico-map "M-k" #'vertico-previous)
 
 #+end_src
 ** modeline
@@ -484,13 +492,15 @@ TODO: move keybindings out of here
     (general-create-definer rune/leader-keys
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
-      :global-prefix "C-SPC")
+      :global-prefix "M-SPC")
 
     (defvar-keymap rune/no-prefix-leader-keymap)
     (rune/leader-keys
       ;; :keymaps 'rune/toggle-keymap
       "." '(find-file :which-key "open file system")
-      "/" '(consult-ripgrep :which-key "search accross files"))
+      "/" '(consult-ripgrep :which-key "search accross files")
+      "r" '(consult-yank-from-kill-ring :which-key "search accross files")
+      )
 
     (defvar-keymap rune/toggle-keymap)
     (rune/leader-keys
@@ -532,7 +542,8 @@ TODO: move keybindings out of here
     (rune/leader-keys
       ;; :keymaps 'rune/file-keymap
       "f" '(:ignore t :which-key "file")
-      "fp" '(mish/open-personal-config-dir :which-key "open personal config"))
+      "fp" '(mish/open-personal-config-dir :which-key "personal config")
+      "fr" '(recentf-open-files :which-key "recent files"))
 
     (defvar-keymap rune/popup-keymap)
     (rune/leader-keys
@@ -546,7 +557,8 @@ TODO: move keybindings out of here
 
     (general-define-key
      :states '(normal visual insert emacs)
-     "C-f" '(consult-line :which-key "find in buffer")))
+     "C-f" '(consult-line :which-key "find in buffer")
+     "C-s" '(save-buffer :which-key "save buffer")))
 
 
 #+end_src
@@ -796,6 +808,8 @@ TODO: incorporate new completions framework with lsp-mode again like: ;; TODO: (
     :commands lsp)
 
 #+end_src
+*** Integrate with consult
+TODO: https://github.com/gagbo/consult-lsp
 *** lsp ui
 Make the lsp interactions happen in a nice looking hovering box instead of minibuffer
 #+begin_src emacs-lisp
