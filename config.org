@@ -261,9 +261,9 @@ We will rebind the default commands to the enhanced consult ones
     ;; if which-key is installed this will trigger it to help
     (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-    ;; TODO:
-    ;; (autoload 'projectile-project-root "projectile")
-    ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+    ;; maybe don't even need to do this because I changed projectile to madify project.el itself anyway
+    (autoload 'projectile-project-root "projectile")
+    (setq consult-project-function (lambda (_) (projectile-project-root)))
     )
 
 #+end_src
@@ -532,6 +532,18 @@ TODO: move keybindings out of here
       "wc" '(evil-window-delete :which-key "close window")
       "wC" '(delete-other-windows :which-key "close all other windows"))
 
+    ;; TODO: IMPORTANT: THIS IS HOW TO BIND KEYMAPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ;; (rune/leader-keys
+    ;;   "p" '(projectile-command-map :which-key "project"))
+
+    (rune/leader-keys
+      ;; :keymaps 'rune/code-keymap
+      "p" '(:ignore t :which-key "project")
+      "pb" '(projectile-switch-to-buffer :which-key "project")
+      "p/" '(projectile-switch-project :which-key "all projects")
+      "ps" '(projectile-find-related-file :which-key "switch to related file")
+      ) 
+
     (defvar-keymap rune/code-keymap)
     (rune/leader-keys
       ;; :keymaps 'rune/code-keymap
@@ -545,13 +557,16 @@ TODO: move keybindings out of here
       ;; :keymaps 'rune/file-keymap
       "f" '(:ignore t :which-key "file")
       "fp" '(mish/open-personal-config-dir :which-key "personal config")
-      "fr" '(recentf-open-files :which-key "recent files"))
+      "fr" '(recentf-open-files :which-key "recent files")
+      "f/" '(projectile-find-file :which-key "find files")
+      )
 
     (defvar-keymap rune/popup-keymap)
     (rune/leader-keys
       ;; :keymaps 'rune/popup-keymap
       "p" '(:ignore t :which-key "pop up")
-      "pm" '(view-echo-area-messages :which-key "view messages"))
+      "pm" '(view-echo-area-messages :which-key "view messages")
+)
 
     (setq mish/help-map (copy-keymap help-map))
 
@@ -570,16 +585,14 @@ TODO: move this higher because things rely on this
 TODO: investigate further: https://github.com/bbatsov/projectile?tab=readme-ov-file https://docs.projectile.mx/projectile/index.html 
 #+begin_src emacs-lisp
 
-  ;; (use-package projectile
-  ;;   :diminish projectile-mode
-  ;;   :config (projectile-mode)
-  ;;   :custom ((projectile-completion-system 'ivy))
-  ;;   :bind-keymap
-  ;;   ("C-c p" . projectile-command-map)
-  ;;   :init
-  ;;   (when (file-directory-p "~/Projects/Code")
-  ;;     (setq projectile-project-search-path '("~/Projects/Code")))
-  ;;   (setq projectile-switch-project-action #'projectile-dired))
+  (use-package projectile
+    :diminish projectile-mode
+    :init
+    (setq projectile-project-search-path '("~/code"))
+    (add-hook 'project-find-functions #'project-projectile)
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'default))
+    )
 
 #+end_src
 ** magit
