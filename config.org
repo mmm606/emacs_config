@@ -203,13 +203,10 @@ Vertico sorts by history position
 Consult provides better searching with things like grep, ripgrep, a better buffer switching interface, recent file/command history. It can help create shortcuts for narrowing
 search results down to the desired candidates.
 **** setup
-TODO: use consult-project-buffer in my keymap! add to projectile to consult-project-buffer-sources
-TODO: experiment with the kill ring stuff for more powerful copy and paste. Also try the register stuff
-TODO: add consult-line-multi to buffer map bc it lets you search but only through open buffers
-TODO: add consult-find, or consult-fd, or consult-locate. These will fuzzy find files
-TODO: add these compile/spell checking things: https://github.com/minad/consult?tab=readme-ov-file#compilation
+Note: consult-fd is a faster version of consult-find, and consult-locate is the fastest of all. However,
+consult-locate uses a database so it might not know about super new files. They are all for fuzzy finding files.
+I use projectile for fuzzy finding project files at the moment, it seems to be quick because projectile indexes everything.
 TODO: try the org agenda ones: https://github.com/minad/consult?tab=readme-ov-file#org-mode
-TODO: add consult-mode-command to "SPC M-x" so you can look at commands that are active right now in open major and minor modes
 We will rebind the default commands to the enhanced consult ones
 #+begin_src emacs-lisp
 
@@ -505,8 +502,8 @@ TODO: move keybindings out of here
 	;; :keymaps 'rune/toggle-keymap
 	"." '(find-file :which-key "open file system")
 	"/" '(consult-ripgrep :which-key "search accross files")
-	"r" '(consult-yank-from-kill-ring :which-key "search accross files")
 	"g" '(magit :which-key "git")
+	":" '(consult-mode-command :which-key "only available M-x")
 	)
 
       (defvar-keymap rune/toggle-keymap)
@@ -521,12 +518,28 @@ TODO: move keybindings out of here
 	;; :keymaps 'rune/toggle-keymap
 	"s" '(org-insert-structure-template :which-key "insert source block"))
 
+      (rune/leader-keys
+	"e" '(:ignore t :which-key "errors")
+	"e/" '(consult-flymake :which-key "search errors")
+	"ec" '(consult-compile-error :which-key "to compilation error")
+	)
+
+      (rune/leader-keys
+	"r" '(:ignore t :which-key "regs/rings")
+	"rk" '(consult-yank-from-kill-ring :which-key "kill ring")
+	"rj" '(evil-collection-consult-jump-list :which-key "jump list")
+	)
+
       (defvar-keymap rune/buffer-keymap)
       (rune/leader-keys
 	;; :keymaps 'rune/buffer-keymap
 	"b" '(:ignore t :which-key "buffer")
-	"bb" '(switch-to-buffer :which-key "switch to buffer")
-	"bk" '(kill-buffer-and-window :which-key "kill buffer"))
+	"bb" '(consult-project-buffer :which-key "switch project buffers")
+	"bB" '(switch-to-buffer :which-key "switch buffers")
+	"bk" '(kill-buffer-and-window :which-key "kill buffer")
+	"b/" '(consult-line-multi :which-key "search project buffers")
+	"bI" '(consult-imenu-multi :which-key "imenu accross project buffers")
+	)
 
       (defvar-keymap rune/window-keymap)
       (rune/leader-keys
@@ -556,6 +569,7 @@ TODO: move keybindings out of here
 	;; :keymaps 'rune/code-keymap
 	"c" '(:ignore t :which-key "code")
 	"cd" '(xref-find-definitions :which-key "jump to definition")
+	"cI" '(consult-imenu :which-key "imenu")
 	)
       ;; TODO: note: can just redefine keys set here using lsp-mode-map bc it basically has nothing in it usually
       ;; TODO: make it so that spc c / will search for symbols and spc c C-f will do it for just this file
@@ -567,6 +581,7 @@ TODO: move keybindings out of here
 	"fp" '(mish/open-personal-config-dir :which-key "personal config")
 	"fr" '(recentf-open-files :which-key "recent files")
 	"f/" '(projectile-find-file :which-key "find files")
+	;; "ff" '(consult-fd :which-key "find files")
 	)
 
       (defvar-keymap rune/popup-keymap)
@@ -624,7 +639,6 @@ TODO: get this going
   ;; https://magit.vc/manual/ghub/Storing-a-Token.html
 #+end_src
 ** Org Mode
-TODO: bind consult-imenu for searching headers in org mode
 ** make commenting easier
 #+begin_src emacs-lisp
 
@@ -815,14 +829,16 @@ Built in treesitter doesn't seem to work well
 *** lsp-mode
 #+begin_src emacs-lisp
 
-  (use-package lsp-mode
-    :init
-    (setq lsp-modeline-diagnostics-enable t)
-    (setq lsp-modeline-diagnostics-scope :workspace)
-    (setq lsp-headerline-breadcrumb-mode t)
-    :config
-    (lsp-enable-which-key-integration t)
-    :commands lsp)
+    (use-package lsp-mode
+      :init
+      (setq lsp-modeline-diagnostics-enable t)
+      (setq lsp-modeline-diagnostics-scope :workspace)
+      (setq lsp-headerline-breadcrumb-mode t)
+      :custom
+      (lsp-auto-guess-root t)
+      :config
+      (lsp-enable-which-key-integration t)
+      :commands lsp)
 
 #+end_src
 *** Integrate with consult
@@ -882,8 +898,7 @@ Make the company completion box look nicer
 *** TODO: Flycheck instead of flymake?
 *** Language Specific Configurations
 **** Python
-****** set up pyright
-TODO: allow venv support and stuff, also make it stop asking for root directory
+***** set up pyright
 #+begin_src emacs-lisp
 
   (use-package lsp-pyright
@@ -893,7 +908,12 @@ TODO: allow venv support and stuff, also make it stop asking for root directory
 				(lsp-deferred))))
 
 #+end_src
+***** venv support
+#+begin_src emacs-lisp
 
+  (use-package pyvenv)
+  
+#+end_src
 **** Ocaml
 ***** tuareg
 Tuareg: an Emacs OCaml mode
