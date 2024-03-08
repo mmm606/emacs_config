@@ -944,38 +944,41 @@ If pyvenv-mode is on then we will be able to call pyvenv-activate
   (defun mish/create-venv-in-project-dir ()
     "Look for a virtual environment named venv in project root directory. If one does not exist, create a venv in project directory. Then activate the virtual environment. This function also sets pyright's venv-dir and turns on lsp-deferred."
     (interactive)
-    (let* (
-	   (python-executable-path (or (executable-find "python3") (executable-find "python")))
-	   (default-directory (projectile-project-root))
-	   (venv-dir (expand-file-name (concat default-directory "/venv")))
-	   )
-      (if (eq python-executable-path nil)
-	  (message "Could not find python executable")
-	(when (not (file-directory-p venv-dir)) 
-	  (with-current-buffer (get-buffer-create "*venv-output*")
-	    (let ((exit-status (call-process python-executable-path nil t nil "-m" "venv" "venv")))
-	      (if (eq exit-status 0)
-		  (message "Did not detect venv in project root, creating one now.")
-		(message "Error creating venv: %s" (buffer-string))))
-	    (erase-buffer)
-	    ))
-	(pyvenv-mode 1)
-	(pyvenv-activate venv-dir)
-	(require 'lsp-pyright)
-	(setq lsp-pyright-venv-path venv-dir)
-	(lsp-deferred)
-	(message "venv activated")
+    ;; If we already have a venv in a parent directory then we don't need to run this. This function will always run the first time a different python project is opened. Even if the venv exists, it will still need to run to activate it. Thus the lsp will get a chance to turn on
+    (unless (and (boundp 'pyvenv-virtual-env) (file-exists-p pyvenv-virtual-env) (file-in-directory-p (file-name-directory pyvenv-virtual-env) default-directory))
+      (let* (
+	     (python-executable-path (or (executable-find "python3") (executable-find "python")))
+	     (default-directory (projectile-project-root))
+	     (venv-dir (expand-file-name (concat default-directory "venv/")))
+	     )
+	(if (eq python-executable-path nil)
+	    (message "Could not find python executable")
+	  (unless (file-directory-p venv-dir)
+	    (with-current-buffer (get-buffer-create "*venv-output*")
+	      (let ((exit-status (call-process python-executable-path nil t nil "-m" "venv" "venv")))
+		(if (eq exit-status 0)
+		    (message "Did not detect venv in project root, creating one now.")
+		  (message "Error creating venv: %s" (buffer-string))))
+	      (erase-buffer)
+	      ))
+	  (pyvenv-mode 1)
+	  (pyvenv-activate venv-dir)
+	  (require 'lsp-pyright)
+	  (setq lsp-pyright-venv-path venv-dir)
+	  (lsp-deferred)
+	  (message "venv activated")
+	  )
 	)
       )
     )
 
-    (use-package pyvenv
-      :custom
-      (pyvenv-mode-line-indicator '(pyvenv-virtual-env-name
-				    ("[venv:" pyvenv-virtual-env-name "] ")))
-      :hook
-      (python-base-mode . mish/create-venv-in-project-dir)
-      )
+  (use-package pyvenv
+    :custom
+    (pyvenv-mode-line-indicator '(pyvenv-virtual-env-name
+				  ("[venv:" pyvenv-virtual-env-name "] ")))
+    :hook
+    (python-base-mode . mish/create-venv-in-project-dir)
+    )
 
 #+end_src
 **** Ocaml
