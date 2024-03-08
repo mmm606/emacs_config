@@ -163,11 +163,16 @@ Vertico is a minibuffer completion framework. So when you look for files, buffer
 #+end_src
 *** save history for completions when emacs restarts
 Vertico sorts by history position
+We also want to persist the kill ring and registers in emacs
+TODO: make it so that bookmarks are in the keymap and they get saved automatically when created, not when emacs is closed to prevent losses of bookmarks
+TODO: make it so that I can jump to a narrow list of files like harpoon
 #+begin_src emacs-lisp
 
   (use-package savehist
     :init
-    (savehist-mode))
+    (savehist-mode)
+    (setq savehist-additional-variables (append '(register-alist kill-ring) savehist-additional-variables)) 
+    )
 
 #+end_src
 *** additional useful configurations according to vertico github
@@ -448,6 +453,7 @@ Otherwise use the default `completion--in-region' function.
 #+end_src
 ** general
 TODO: move keybindings out of here
+TODO: figure out how to do the shadowing, creating keymaps, and buffer local shadowing with general
 #+begin_src emacs-lisp
   ;; maybe?: (dired-current-directory &optional LOCALP)
     (defun mish/personal-config-dir ()
@@ -513,7 +519,9 @@ TODO: move keybindings out of here
 	;; :keymaps 'rune/toggle-keymap
 	"t" '(:ignore t :which-key "toggles")
 	"tt" '(consult-theme :which-key "choose theme")
-	"ts" '(hydra-text-scale/body :which-key "scale text"))
+	"ts" '(hydra-text-scale/body :which-key "scale text")
+	"td" '(ediff :which-key "diff")
+	)
 
       (defvar-keymap rune/insert-keymap)
       (rune/leader-keys
@@ -521,15 +529,22 @@ TODO: move keybindings out of here
 	"s" '(org-insert-structure-template :which-key "insert source block"))
 
       (rune/leader-keys
-	"e" '(:ignore t :which-key "errors")
-	"e/" '(consult-flymake :which-key "search errors")
-	"ec" '(consult-compile-error :which-key "to compilation error")
+	"!" '(:ignore t :which-key "errors")
+	"!/" '(consult-flymake :which-key "search errors")
+	"!c" '(consult-compile-error :which-key "to compilation error")
+	)
+
+      (rune/leader-keys
+	"e" '(:ignore t :which-key "edit")
+	"et" '(transpose-words :which-key "transpose words")
 	)
 
       (rune/leader-keys
 	"r" '(:ignore t :which-key "regs/rings")
 	"rk" '(consult-yank-from-kill-ring :which-key "kill ring")
 	"rj" '(evil-collection-consult-jump-list :which-key "jump list")
+	"rs" '(consult-register-store :which-key "store in reg")
+	"rr" '(consult-register :which-key "registers")
 	)
 
       (defvar-keymap rune/buffer-keymap)
@@ -548,7 +563,7 @@ TODO: move keybindings out of here
 	;; :keymaps 'rune/window-keymap
 	"w" '(:ignore t :which-key "window")
 	"wk" '(evil-window-up :which-key "window up")
-	"wj" '(evil-window-up :which-key "window down")
+	"wj" '(evil-window-down :which-key "window down")
 	"wh" '(evil-window-left :which-key "window left")
 	"wl" '(evil-window-right :which-key "window right")
 	"wc" '(evil-window-delete :which-key "close window")
@@ -620,6 +635,16 @@ TODO: move keybindings out of here
     )
 
 #+end_src
+** ediff
+#+begin_src emacs-lisp
+
+  (use-package ediff
+    :custom
+    (ediff-split-window-function 'split-window-horizontally)
+    (ediff-window-setup-function 'ediff-setup-windows-plain)
+    )
+
+#+end_src
 ** magit
 #+begin_src emacs-lisp
 
@@ -649,6 +674,7 @@ TODO: get this going
 
 #+end_src
 *** org
+TODO: do this more
 #+begin_src emacs-lisp
 
   (use-package org
@@ -903,18 +929,54 @@ Make the company completion box look nicer
 ***** set up pyright
 #+begin_src emacs-lisp
 
-  (use-package lsp-pyright
-    :ensure t
-    :hook (python-base-mode . (lambda ()
-				(require 'lsp-pyright)
-				(lsp-deferred))))
+    (use-package lsp-pyright
+      ;; :ensure t
+      ;; :hook (python-base-mode . (lambda ()
+      ;; 				  (require 'lsp-pyright)
+      ;; 				  (lsp-deferred)))
+      )
 
 #+end_src
 ***** venv support
+If pyvenv-mode is on then we will be able to call pyvenv-activate
 #+begin_src emacs-lisp
 
-  (use-package pyvenv)
-  
+  (defun mish/create-venv-in-project-dir ()
+    "Look for a virtual environment named venv in project root directory. If one does not exist, create a venv in project directory. Then activate the virtual environment. This function also sets pyright's venv-dir and turns on lsp-deferred."
+    (interactive)
+    (let* (
+	   (python-executable-path (or (executable-find "python3") (executable-find "python")))
+	   (default-directory (projectile-project-root))
+	   (venv-dir (expand-file-name (concat default-directory "/venv")))
+	   )
+      (if (eq python-executable-path nil)
+	  (message "Could not find python executable")
+	(when (not (file-directory-p venv-dir)) 
+	  (with-current-buffer (get-buffer-create "*venv-output*")
+	    (let ((exit-status (call-process python-executable-path nil t nil "-m" "venv" "venv")))
+	      (if (eq exit-status 0)
+		  (message "Did not detect venv in project root, creating one now.")
+		(message "Error creating venv: %s" (buffer-string))))
+	    (erase-buffer)
+	    ))
+	(pyvenv-mode 1)
+	(pyvenv-activate venv-dir)
+	(require 'lsp-pyright)
+	(setq lsp-pyright-venv-path venv-dir)
+	(lsp-deferred)
+	(message "venv activated")
+	)
+      )
+    )
+
+    (use-package pyvenv
+      :custom
+      (pyvenv-mode-line-indicator '(pyvenv-virtual-env-name
+				    ("[venv:" pyvenv-virtual-env-name "] ")))
+      :hook
+      (python-base-mode . mish/create-venv-in-project-dir)
+      )
+
 #+end_src
 **** Ocaml
 ***** tuareg
