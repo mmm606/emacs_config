@@ -456,139 +456,284 @@ TODO: move keybindings out of here
 TODO: figure out how to do the shadowing, creating keymaps, and buffer local shadowing with general
 #+begin_src emacs-lisp
   ;; maybe?: (dired-current-directory &optional LOCALP)
-    (defun mish/personal-config-dir ()
-      "This function will get the directory that the user's init file is in"
-      (interactive)
-      (if-let (
-	       (is-bound (boundp 'chemacs-profile))
-	       (its-assoc (assoc 'user-emacs-directory chemacs-profile))
-	       )
-	  (cdr its-assoc)
-	(file-name-directory user-init-file)
-	)
+  (defun mish/personal-config-dir ()
+    "This function will get the directory that the user's init file is in"
+    (interactive)
+    (if-let (
+	     (is-bound (boundp 'chemacs-profile))
+	     (its-assoc (assoc 'user-emacs-directory chemacs-profile))
+	     )
+	(cdr its-assoc)
+      (file-name-directory user-init-file)
       )
+    )
 
-    (defun mish/open-personal-config-dir ()
-      "This function will open the directory of the user's init file"
-      (interactive)
-      (let ((default-directory (concat (mish/personal-config-dir) "/")))
-	(call-interactively 'find-file)))
+  (defun mish/open-personal-config-dir ()
+    "This function will open the directory of the user's init file"
+    (interactive)
+    (let ((default-directory (concat (mish/personal-config-dir) "/")))
+      (call-interactively 'find-file)))
 
-    (defun mish/call-in-order (alist-of-func-keys-and-arg-values)
-      "This function takes an alist of key values being a function and the values being a list of args. It will try to call each one in order if and only if it is bound. If it is bound and returns a truthy value then we stop and return that value"
-      (cl-some
-       (lambda (key-value-pair)
-	 (let
-	     (
-	      (func (car key-value-pair))
-	      (args (cdr key-value-pair))
-	      )
-	   (and
-	    (message "doing it")
-	    (fboundp func)
-	    (message "it was bound")
-	    (apply func args)
+  (defun mish/call-in-order (alist-of-func-keys-and-arg-values)
+    "This function takes an alist of key values being a function and the values being a list of args. It will try to call each one in order if and only if it is bound. If it is bound and returns a truthy value then we stop and return that value"
+    (cl-some
+     (lambda (key-value-pair)
+       (let
+	   (
+	    (func (car key-value-pair))
+	    (args (cdr key-value-pair))
 	    )
-	   )
+	 (and
+	  (message "doing it")
+	  (fboundp func)
+	  (message "it was bound")
+	  (apply func args)
+	  )
 	 )
-       alist-of-func-keys-and-arg-values
        )
+     alist-of-func-keys-and-arg-values
+     )
+    )
+
+  ;; (lookup-key evil-motion-state-map (kbd "SPC"))
+  ;; (defvar mish/evil-non-insert-states 
+  ;;   '(normal visual motion emacs))
+
+  ;; ;; 
+  ;; unbind space from evil
+  ;; (evil-define-key mish/evil-non-insert-states 'global (kbd "SPC") nil)
+
+  ;; (defvar-keymap mish/code-keymap
+  ;;   :doc
+  ;;   "Key bindings for code related actions"
+  ;;   "d" #'xref-find-definitions 
+  ;;   "I" #'consult-imenu
+  ;;   )
+
+  ;; (defvar-keymap mish/leader-keymap
+  ;;   :doc "leader prefix keymap"
+  ;;   "c"  mish/code-keymap
+  ;;   )
+
+  ;; (which-key-add-keymap-based-replacements mish/code-keymap
+  ;;   "d" "jump to definition"
+  ;;   "I" "imenu")
+
+
+  ;; ;; add leader mapping
+  ;; (evil-define-key mish/evil-non-insert-states 'global (kbd "SPC") mish/leader-keymap)
+
+  (use-package general
+    :config
+    (general-evil-setup t)
+
+    (general-create-definer rune/leader-keys
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "M-SPC")
+
+    (defvar-keymap rune/no-prefix-leader-keymap)
+    (rune/leader-keys
+      ;; :keymaps 'rune/toggle-keymap
+      "." '(find-file :which-key "open file system")
+      "/" '(consult-ripgrep :which-key "search accross files")
+      "g" '(magit :which-key "git")
+      ":" '(consult-mode-command :which-key "only available M-x")
+      "Q" '(save-buffers-kill-terminal :which-key "quit emacs")
       )
 
+    (defvar-keymap rune/toggle-keymap)
+    (rune/leader-keys
+      ;; :keymaps 'rune/toggle-keymap
+      "t" '(:ignore t :which-key "toggles")
+      "tt" '(consult-theme :which-key "choose theme")
+      "ts" '(hydra-text-scale/body :which-key "scale text")
+      "td" '(ediff :which-key "diff")
+      )
 
-    (use-package general
-      :config
-      (general-evil-setup t)
+    (defvar-keymap rune/insert-keymap)
+    (rune/leader-keys
+      ;; :keymaps 'rune/toggle-keymap
+      "s" '(org-insert-structure-template :which-key "insert source block"))
 
-      (general-create-definer rune/leader-keys
-	:keymaps '(normal insert visual emacs)
-	:prefix "SPC"
-	:global-prefix "M-SPC")
+    (rune/leader-keys
+      "!" '(:ignore t :which-key "errors")
+      "!/" '(consult-flymake :which-key "search errors")
+      "!c" '(consult-compile-error :which-key "to compilation error")
+      )
 
-      (defvar-keymap rune/no-prefix-leader-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/toggle-keymap
-	"." '(find-file :which-key "open file system")
-	"/" '(consult-ripgrep :which-key "search accross files")
-	"g" '(magit :which-key "git")
-	":" '(consult-mode-command :which-key "only available M-x")
-	)
+    (rune/leader-keys
+      "e" '(:ignore t :which-key "edit")
+      "et" '(transpose-words :which-key "transpose words")
+      )
 
-      (defvar-keymap rune/toggle-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/toggle-keymap
-	"t" '(:ignore t :which-key "toggles")
-	"tt" '(consult-theme :which-key "choose theme")
-	"ts" '(hydra-text-scale/body :which-key "scale text")
-	"td" '(ediff :which-key "diff")
-	)
+    (rune/leader-keys
+      "r" '(:ignore t :which-key "regs/rings")
+      "rk" '(consult-yank-from-kill-ring :which-key "kill ring")
+      "rj" '(evil-collection-consult-jump-list :which-key "jump list")
+      "rs" '(consult-register-store :which-key "store in reg")
+      "rr" '(consult-register :which-key "registers")
+      )
 
-      (defvar-keymap rune/insert-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/toggle-keymap
-	"s" '(org-insert-structure-template :which-key "insert source block"))
+    (defvar-keymap rune/buffer-keymap)
+    (rune/leader-keys
+      ;; :keymaps 'rune/buffer-keymap
+      "b" '(:ignore t :which-key "buffer")
+      "bb" '(consult-project-buffer :which-key "switch project buffers")
+      "bB" '(switch-to-buffer :which-key "switch buffers")
+      "bk" '(kill-buffer-and-window :which-key "kill buffer")
+      "b/" '(consult-line-multi :which-key "search project buffers")
+      "bI" '(consult-imenu-multi :which-key "imenu accross project buffers")
+      )
 
-      (rune/leader-keys
-	"!" '(:ignore t :which-key "errors")
-	"!/" '(consult-flymake :which-key "search errors")
-	"!c" '(consult-compile-error :which-key "to compilation error")
-	)
+    (defvar-keymap rune/window-keymap)
+    (rune/leader-keys
+      ;; :keymaps 'rune/window-keymap
+      "w" '(:ignore t :which-key "window")
+      "wk" '(evil-window-up :which-key "window up")
+      "wj" '(evil-window-down :which-key "window down")
+      "wh" '(evil-window-left :which-key "window left")
+      "wl" '(evil-window-right :which-key "window right")
+      "wc" '(evil-window-delete :which-key "close window")
+      "wC" '(delete-other-windows :which-key "close all other windows"))
 
-      (rune/leader-keys
-	"e" '(:ignore t :which-key "edit")
-	"et" '(transpose-words :which-key "transpose words")
-	)
+    ;; TODO: IMPORTANT: THIS IS HOW TO BIND KEYMAPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ;; (rune/leader-keys
+    ;;   "p" '(projectile-command-map :which-key "project"))
 
-      (rune/leader-keys
-	"r" '(:ignore t :which-key "regs/rings")
-	"rk" '(consult-yank-from-kill-ring :which-key "kill ring")
-	"rj" '(evil-collection-consult-jump-list :which-key "jump list")
-	"rs" '(consult-register-store :which-key "store in reg")
-	"rr" '(consult-register :which-key "registers")
-	)
+    (rune/leader-keys
+      ;; :keymaps 'rune/code-keymap
+      "p" '(:ignore t :which-key "project")
+      "pb" '(projectile-switch-to-buffer :which-key "project")
+      "p/" '(projectile-switch-project :which-key "all projects")
+      "ps" '(projectile-find-related-file :which-key "switch to related file")
+      ) 
 
-      (defvar-keymap rune/buffer-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/buffer-keymap
-	"b" '(:ignore t :which-key "buffer")
-	"bb" '(consult-project-buffer :which-key "switch project buffers")
-	"bB" '(switch-to-buffer :which-key "switch buffers")
-	"bk" '(kill-buffer-and-window :which-key "kill buffer")
-	"b/" '(consult-line-multi :which-key "search project buffers")
-	"bI" '(consult-imenu-multi :which-key "imenu accross project buffers")
-	)
+    (rune/leader-keys
+      "c" '(:ignore t :which-key "code")
 
-      (defvar-keymap rune/window-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/window-keymap
-	"w" '(:ignore t :which-key "window")
-	"wk" '(evil-window-up :which-key "window up")
-	"wj" '(evil-window-down :which-key "window down")
-	"wh" '(evil-window-left :which-key "window left")
-	"wl" '(evil-window-right :which-key "window right")
-	"wc" '(evil-window-delete :which-key "close window")
-	"wC" '(delete-other-windows :which-key "close all other windows"))
+      "cd" '(xref-find-definitions :which-key "find definition")
+      "cd" '(:predicate (lambda () (and (bound-and-true-p lsp-mode)) (lsp-feature? "textDocument/definition"))
+			:wk "jump to definition (LSP)"
+			:def lsp-find-definition)
 
-      ;; TODO: IMPORTANT: THIS IS HOW TO BIND KEYMAPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      ;; (rune/leader-keys
-      ;;   "p" '(projectile-command-map :which-key "project"))
+      "cr" '(xref-find-references :which-key "find references")
+      "cr" '(:predicate (lambda () (and (bound-and-true-p lsp-mode)) (lsp-feature? "textDocument/references"))
+			:wk  "find references (LSP)"
+			:def lsp-find-references)
 
-      (rune/leader-keys
-	;; :keymaps 'rune/code-keymap
-	"p" '(:ignore t :which-key "project")
-	"pb" '(projectile-switch-to-buffer :which-key "project")
-	"p/" '(projectile-switch-project :which-key "all projects")
-	"ps" '(projectile-find-related-file :which-key "switch to related file")
-	) 
+      "ci" '(:predicate (lambda () (and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/references")))
+			:wk  "find implementations (LSP)"
+			:def lsp-find-implementation)
 
-      (defvar-keymap rune/code-keymap)
-      (rune/leader-keys
-	;; :keymaps 'rune/code-keymap
-	"c" '(:ignore t :which-key "code")
-	"cd" '(xref-find-definitions :which-key "jump to definition")
-	"cI" '(consult-imenu :which-key "imenu")
-	)
-      ;; TODO: note: can just redefine keys set here using lsp-mode-map bc it basically has nothing in it usually
+      "cd" '(:predicate (lambda () (and (bound-and-true-p lsp-mode)) (lsp-feature? "textDocument/implementation"))
+			:wk  "find declarations (LSP)"
+			:def lsp-find-declaration)
+
+      "ct" '(:predicate (lambda () (and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/typeDefinition")))
+			:wk "find type definition"
+			:def lsp-find-type-definition)
+
+      "cp" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "describe thing at point"
+			:def lsp-describe-thing-at-point)
+
+      "ca" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "code action"
+			:def lsp-execute-code-action)
+
+      "c=" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "format buffer"
+			:def lsp-format-buffer)
+
+      "ch" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "highlight references"
+			:def lsp-document-highlight)
+
+      "cT" '(:predicate (lambda () (and (bound-and-true-p lsp-mode) (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy")))
+			:wk "type hierarchy"
+			:def lsp-java-type-hierarchy)
+      "cT" '(:predicate (lambda () (and (not (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy"))
+		    (functionp 'lsp-treemacs-type-hierarchy)
+		    (lsp-feature? "textDocument/typeHierarchy")))
+			:wk "type hierarchy"
+			:def lsp-treemacs-type-hierarchy)
+
+      "cc" '(:predicate (lambda () (and (bound-and-true-p lsp-mode) (functionp 'lsp-treemacs-call-hierarchy)
+		    (lsp-feature? "textDocument/callHierarchy")))
+			:wk "call hierarchy"
+			:def lsp-treemacs-call-hierarchy)
+
+      "cR" '(:predicate (lambda () (and (bound-and-true-p lsp-mode) (lsp-feature? "textDocument/rename")))
+			:wk "rename"
+			:def lsp-rename)
+
+      "cS" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "Session"
+			:def nil)
+      "cSl" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "logs"
+			:def lsp-workspace-logs-show)
+      "cSd" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "describe"
+			:def lsp-describe-session)
+      "cSs" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "shut down"
+			:def lsp-shutdown-workspace)
+
+      "cF" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "Workspace folders"
+			:def nil)
+      "cFa" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "add folders"
+			:def lsp-workspace-folders-add)
+      "cFr" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "remove folders"
+			:def lsp-workspace-folders-remove)
+      "cFo" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "open folders"
+			:def lsp-workspace-folders-open)
+
+      "cT" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "Toggle lsp features"
+			:def nil)
+      "cTl" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "lenses"
+			:def lsp-lens-mode)
+      "cTh" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk ""Headerline breadcrumb"
+			:def lsp-headerline-breadcrumb-mode)
+      "cTa" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "modeline code actions"
+			:def lsp-modeline-code-actions-mode)
+      "cTo" '(:predicate (lambda () (bound-and-true-p lsp-mode))
+			:wk "Modeline diagnostics" 
+			:def lsp-modeline-diagnostics-mode)
+
+      "cI" '(consult-imenu :which-key "imenu")
+      )
+
+    ;; (defvar-keymap rune/code-keymap)
+    ;; (rune/leader-keys
+    ;;   ;; :keymaps 'rune/code-keymap
+    ;;   "c" '(:ignore t :which-key "code")
+    ;;   "cd" '(xref-find-definitions :which-key "jump to definition")
+    ;;   "cd" '(xref-find-definitions :which-key "jump to definition")
+    ;;   "cI" '(consult-imenu :which-key "imenu")
+    ;;   )
+
+    ;; ;; (lsp-defin
+    e-conditional-key rune/leader-keymap (kbd "c d") #'lsp-find-definition
+    ;;   :enable (bound-and-true-p lsp-mode)
+    ;;   :which-key "jump to definition (LSP)")
+
+    ;; ;; 
+    (lsp-define-conditional-key rune/leader-keymap (kbd "c d") #'lsp-find-definition
+      ;;   :enable (bound-and-true-p lsp-mode)
+      ;;   :which-key "jump to definition (LSP)")
+
+      ;; ;; 
+      TODO: note: can just redefine keys set here using lsp-mode-map bc it basically has nothing in it usually
       ;; TODO: make it so that spc c / will search for symbols and spc c C-f will do it for just this file
 
       (defvar-keymap rune/file-keymap)
@@ -606,7 +751,7 @@ TODO: figure out how to do the shadowing, creating keymaps, and buffer local sha
 	;; :keymaps 'rune/popup-keymap
 	"p" '(:ignore t :which-key "pop up")
 	"pm" '(view-echo-area-messages :which-key "view messages")
-  )
+	)
 
       (setq mish/help-map (copy-keymap help-map))
 
