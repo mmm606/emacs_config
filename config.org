@@ -456,7 +456,7 @@ TODO: move keybindings out of here
 TODO: figure out how to do the shadowing, creating keymaps, and buffer local shadowing with general
 #+begin_src emacs-lisp
   ;; maybe?: (dired-current-directory &optional LOCALP)
-  (defun mish/personal-config-dir ()
+  (defun my/personal-config-dir ()
     "This function will get the directory that the user's init file is in"
     (interactive)
     (if-let (
@@ -468,13 +468,13 @@ TODO: figure out how to do the shadowing, creating keymaps, and buffer local sha
       )
     )
 
-  (defun mish/open-personal-config-dir ()
+  (defun my/open-personal-config-dir ()
     "This function will open the directory of the user's init file"
     (interactive)
-    (let ((default-directory (concat (mish/personal-config-dir) "/")))
+    (let ((default-directory (concat (my/personal-config-dir) "/")))
       (call-interactively 'find-file)))
 
-  (defun mish/call-in-order (alist-of-func-keys-and-arg-values)
+  (defun my/call-in-order (alist-of-func-keys-and-arg-values)
     "This function takes an alist of key values being a function and the values being a list of args. It will try to call each one in order if and only if it is bound. If it is bound and returns a truthy value then we stop and return that value"
     (cl-some
      (lambda (key-value-pair)
@@ -608,7 +608,7 @@ TODO: figure out how to do the shadowing, creating keymaps, and buffer local sha
   ;;   (rune/leader-keys
   ;;     ;; :keymaps 'rune/file-keymap
   ;;     "f" '(:ignore t :which-key "file")
-  ;;     "fp" '(mish/open-personal-config-dir :which-key "personal config")
+  ;;     "fp" '(my/open-personal-config-dir :which-key "personal config")
   ;;     "fr" '(recentf-open-files :which-key "recent files")
   ;;     "f/" '(projectile-find-file :which-key "find files")
   ;;     ;; "ff" '(consult-fd :which-key "find files")
@@ -621,9 +621,9 @@ TODO: figure out how to do the shadowing, creating keymaps, and buffer local sha
   ;;     "pm" '(view-echo-area-messages :which-key "view messages")
   ;;     )
 
-  ;;   (setq mish/help-map (copy-keymap help-map))
+  ;;   (setq my/help-map (copy-keymap help-map))
 
-  ;;   (rune/leader-keys "h" '(:keymap mish/help-map :which-key "help"))
+  ;;   (rune/leader-keys "h" '(:keymap my/help-map :which-key "help"))
 
   ;;   (general-define-key
   ;;    :states '(normal visual insert emacs)
@@ -954,7 +954,7 @@ Make the company completion box look nicer
 If pyvenv-mode is on then we will be able to call pyvenv-activate
 #+begin_src emacs-lisp
 
-  (defun mish/create-venv-in-project-dir ()
+  (defun my/create-venv-in-project-dir ()
     "Look for a virtual environment named venv in project root directory. If one does not exist, create a venv in project directory. Then activate the virtual environment. This function also sets pyright's venv-dir and turns on lsp-deferred."
     (interactive)
     ;; If we already have a venv in a parent directory then we don't need to run this. This function will always run the first time a different python project is opened. Even if the venv exists, it will still need to run to activate it. Thus the lsp will get a chance to turn on
@@ -990,7 +990,7 @@ If pyvenv-mode is on then we will be able to call pyvenv-activate
     (pyvenv-mode-line-indicator '(pyvenv-virtual-env-name
 				  ("[venv:" pyvenv-virtual-env-name "] ")))
     :hook
-    (python-base-mode . mish/create-venv-in-project-dir)
+    (python-base-mode . my/create-venv-in-project-dir)
     )
 
 #+end_src
@@ -1052,33 +1052,33 @@ Provides modern IDE features to editors
 *** sub leader maps
 #+begin_src emacs-lisp
 
-  (defvar-keymap mish/toggle-keymap
+  (defvar-keymap my/toggle-keymap
     "t" #'consult-theme
     "s" #'hydra-text-scale/body
     "d" #'ediff
     )
 
-  (defvar-keymap mish/insert-keymap
+  (defvar-keymap my/insert-keymap
     "s" #'org-insert-structure-template
     )
 
-  (defvar-keymap mish/error-keymap
+  (defvar-keymap my/error-keymap
     "/" #'consult-flymake
     "c" #'consult-compile-error
     )
 
-  (defvar-keymap mish/edit-keymap
+  (defvar-keymap my/edit-keymap
     "t" #'transpose-words
     )
 
-  (defvar-keymap mish/rings-and-regs-keymap
+  (defvar-keymap my/rings-and-regs-keymap
     "k" #'consult-yank-from-kill-ring
     "j" #'evil-collection-consult-jump-list
     "s" #'consult-register-store
     "r" #'consult-register
     )
 
-  (defvar-keymap mish/buffer-keymap
+  (defvar-keymap my/buffer-keymap
     "b" #'consult-project-buffer
     "B" #'switch-to-buffer
     "k" #'kill-buffer-and-window
@@ -1086,7 +1086,7 @@ Provides modern IDE features to editors
     "I" #'consult-imenu-multi
     )
 
-  (defvar-keymap mish/window-keymap
+  (defvar-keymap my/window-keymap
     "k" #'evil-window-up
     "j" #'evil-window-down
     "h" #'evil-window-left
@@ -1095,73 +1095,93 @@ Provides modern IDE features to editors
     "C" #'delete-other-windows
     )
 
-  (defvar-keymap mish/project-keymap
+  (defvar-keymap my/project-keymap
     "b" #'projectile-switch-to-buffer
     "/" #'projectile-switch-project
     "s" #'projectile-find-related-file
     ) 
 
-  (defvar-keymap mish/file-keymap
-    "p" #'mish/open-personal-config-dir
+  (defvar-keymap my/file-keymap
+    "p" #'my/open-personal-config-dir
     "r" #'recentf-open-files
     "/" #'projectile-find-file
     "f" #'consult-fd
     )
 
-  (defvar-keymap mish/code-keymap
+  (defvar-keymap my/code-keymap
       "d" #'xref-find-definitions
    ) 
 
-  (defvar-keymap mish/lsp-code-keymap
+  (defvar-keymap my/lsp-code-keymap
     "d" #'lsp-find-definition 
+    "i" #'lsp-find-implementation
    ) 
+
+  (defvar-keymap my/not-wanted-lsp-code-keymap
+    "d"
+    (lambda ()
+      (if lsp-mode
+	  (call-interactively #'lsp-find-definition)
+	(call-interactively #'lsp-find-definition)))
+
+    "i"
+    (lambda ()
+      (if lsp-mode
+	  (call-interactively #'lsp-find-definition)
+	(message "lsp is not available")))
+    ) 
 
 #+end_src
 *** minor mode
 #+begin_src emacs-lisp
 
 
-      (defvar-keymap mish/leader-keymap
-	"." #'find-file
-	"/" #'consult-ripgrep
-	"g" #'magit
-	":" #'consult-mode-command
-	"Q" #'ave-buffers-kill-terminal
+  (defvar-keymap my/leader-keymap
+    "." #'find-file
+    "/" #'consult-ripgrep
+    "g" #'magit
+    ":" #'consult-mode-command
+    "Q" #'ave-buffers-kill-terminal
 
-	"f" mish/file-keymap
-	"p" mish/project-keymap
-	"w" mish/window-keymap
-	"b" mish/buffer-keymap
-	"r" mish/rings-and-regs-keymap
-	"e" mish/edit-keymap
-	"!" mish/error-keymap
-	"i" mish/insert-keymap
-	"t" mish/toggle-keymap
-	"c" mish/code-keymap
-	)
+    "f" my/file-keymap
+    "p" my/project-keymap
+    "w" my/window-keymap
+    "b" my/buffer-keymap
+    "r" my/rings-and-regs-keymap
+    "e" my/edit-keymap
+    "!" my/error-keymap
+    "i" my/insert-keymap
+    "t" my/toggle-keymap
+    "c" my/code-keymap
+    )
 
 
-      ;; (evil-define-keymap mish/leader-key-keymap
-      ;;   "My custom Evil keymap."
-      ;;   :mode evil-mode
-      ;;   :local t
-      ;;   (kbd " ") mish/leader-keymap
-      ;;   )
+  ;; (evil-define-keymap my/leader-key-keymap
+  ;;   "My custom Evil keymap."
+  ;;   :mode evil-mode
+  ;;   :local t
+  ;;   (kbd " ") my/leader-keymap
+  ;;   )
 
-      ;; (defvar-keymap mish/leader-key-minor-mode-map)
-      ;;   (define-minor-mode mish/leader-key-minor-mode
-      ;; 	"A mode for my custom keybindings."
-      ;; 	:keymap mish/leader-key-minor-mode-map
-      ;; 	)
-  ;;     (add-hook 'mish/leader-key-minor-mode-hook (lambda () (make-local-variable 'mish/leader-key-minor-mode-map)))
-  ;;     (mish/leader-key-minor-mode t)
+  ;; (defvar-keymap my/leader-key-minor-mode-map)
+  ;;   (define-minor-mode my/leader-key-minor-mode
+  ;; 	"A mode for my custom keybindings."
+  ;; 	:keymap my/leader-key-minor-mode-map
+  ;; 	)
+  ;;     (add-hook 'my/leader-key-minor-mode-hook (lambda () (make-local-variable 'my/leader-key-minor-mode-map)))
+  ;;     (my/leader-key-minor-mode t)
 
   (unbind-key "SPC" evil-motion-state-map)
-  (bind-key "SPC" mish/leader-keymap evil-motion-state-map)
-  (add-hook lsp-mode-hook (lambda () (bind-key "c" mish/lsp-code-keymap mish/leader-keymap)))
+  (bind-key "SPC" my/leader-keymap evil-motion-state-map)
+  ;; (add-hook 'lsp-mode-hook
+  ;; 	  (lambda ()
+  ;; 	    (make-local-variable 'my/leader-keymap)
+  ;; 	    (bind-key "c" my/lsp-code-keymap my/leader-keymap))
+  ;; 	  )
 
-
-
+  (add-hook 'lsp-mode-hook
+	    (lambda ()
+	      (evil-local-set-key 'motion (kbd "SPC c") my/lsp-code-keymap)))
 
 
 #+end_src
