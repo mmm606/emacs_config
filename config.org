@@ -1108,50 +1108,60 @@ Provides modern IDE features to editors
     "f" #'consult-fd
     )
 
+  (defvar-keymap mish/code-keymap
+      "d" #'xref-find-definitions
+   ) 
+
+  (defvar-keymap mish/lsp-code-keymap
+    "d" #'lsp-find-definition 
+   ) 
+
 #+end_src
 *** minor mode
 #+begin_src emacs-lisp
 
 
-    (defvar-keymap mish/leader-keymap
-      "." #'find-file
-      "/" #'consult-ripgrep
-      "g" #'magit
-      ":" #'consult-mode-command
-      "Q" #'ave-buffers-kill-terminal
+      (defvar-keymap mish/leader-keymap
+	"." #'find-file
+	"/" #'consult-ripgrep
+	"g" #'magit
+	":" #'consult-mode-command
+	"Q" #'ave-buffers-kill-terminal
 
-      "f" mish/file-keymap
-      "p" mish/project-keymap
-      "w" mish/window-keymap
-      "b" mish/buffer-keymap
-      "r" mish/rings-and-regs-keymap
-      "e" mish/edit-keymap
-      "!" mish/error-keymap
-      "i" mish/insert-keymap
-      "t" mish/toggle-keymap
-      )
-
-
-    ;; (evil-define-keymap mish/leader-key-keymap
-    ;;   "My custom Evil keymap."
-    ;;   :mode evil-mode
-    ;;   :local t
-    ;;   (kbd " ") mish/leader-keymap
-    ;;   )
-
-    ;; (defvar-keymap mish/leader-key-minor-mode-map)
-    ;;   (define-minor-mode mish/leader-key-minor-mode
-    ;; 	"A mode for my custom keybindings."
-    ;; 	:keymap mish/leader-key-minor-mode-map
-    ;; 	)
-    ;; (evil-define-key 'normal mish/leader-key-minor-mode (kbd " ") mish/leader-keymap)
-  (evil-define-key 'normal mish/leader-key-minor-mode (kbd " ") mish/leader-keymap)
-  (evil-global-set-key 'motion (kbd " ") mish/leader-keymap)
+	"f" mish/file-keymap
+	"p" mish/project-keymap
+	"w" mish/window-keymap
+	"b" mish/buffer-keymap
+	"r" mish/rings-and-regs-keymap
+	"e" mish/edit-keymap
+	"!" mish/error-keymap
+	"i" mish/insert-keymap
+	"t" mish/toggle-keymap
+	"c" mish/code-keymap
+	)
 
 
+      ;; (evil-define-keymap mish/leader-key-keymap
+      ;;   "My custom Evil keymap."
+      ;;   :mode evil-mode
+      ;;   :local t
+      ;;   (kbd " ") mish/leader-keymap
+      ;;   )
 
-    (add-hook 'mish/leader-key-minor-mode-hook (lambda () (make-local-variable 'mish/leader-key-minor-mode-map)))
+      ;; (defvar-keymap mish/leader-key-minor-mode-map)
+      ;;   (define-minor-mode mish/leader-key-minor-mode
+      ;; 	"A mode for my custom keybindings."
+      ;; 	:keymap mish/leader-key-minor-mode-map
+      ;; 	)
+  ;;     (add-hook 'mish/leader-key-minor-mode-hook (lambda () (make-local-variable 'mish/leader-key-minor-mode-map)))
+  ;;     (mish/leader-key-minor-mode t)
 
-    (mish/leader-key-minor-mode t)
+  (unbind-key "SPC" evil-motion-state-map)
+  (bind-key "SPC" mish/leader-keymap evil-motion-state-map)
+  (add-hook lsp-mode-hook (lambda () (bind-key "c" mish/lsp-code-keymap mish/leader-keymap)))
+
+
+
+
 
 #+end_src
