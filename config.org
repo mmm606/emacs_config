@@ -1049,6 +1049,13 @@ Provides modern IDE features to editors
 #+end_src
 
 ** Custom keybindings
+*** non leader custom keymaps
+#+begin_src emacs-lisp
+
+  (evil-global-set-key 'motion (kbd "C-f") #'consult-line)
+  (evil-global-set-key 'motion (kbd "C-s") #'save-buffer)
+
+#+end_src
 *** default leader keymap
 #+begin_src emacs-lisp
 
@@ -1109,8 +1116,8 @@ Provides modern IDE features to editors
     )
 
   (defvar-keymap my/code-keymap
-      "d" #'xref-find-definitions
-   ) 
+    "d" #'xref-find-definitions
+    ) 
 
   (defvar-keymap my/leader-keymap
     "." #'find-file
