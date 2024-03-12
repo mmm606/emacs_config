@@ -1048,8 +1048,8 @@ Provides modern IDE features to editors
 
 #+end_src
 
-** attempt at custom keybinds
-*** sub leader maps
+** Custom keybindings
+*** default leader keymap
 #+begin_src emacs-lisp
 
   (defvar-keymap my/toggle-keymap
@@ -1112,36 +1112,12 @@ Provides modern IDE features to editors
       "d" #'xref-find-definitions
    ) 
 
-  (defvar-keymap my/lsp-code-keymap
-    "d" #'lsp-find-definition 
-    "i" #'lsp-find-implementation
-   ) 
-
-  (defvar-keymap my/not-wanted-lsp-code-keymap
-    "d"
-    (lambda ()
-      (if lsp-mode
-	  (call-interactively #'lsp-find-definition)
-	(call-interactively #'lsp-find-definition)))
-
-    "i"
-    (lambda ()
-      (if lsp-mode
-	  (call-interactively #'lsp-find-definition)
-	(message "lsp is not available")))
-    ) 
-
-#+end_src
-*** minor mode
-#+begin_src emacs-lisp
-
-
   (defvar-keymap my/leader-keymap
     "." #'find-file
     "/" #'consult-ripgrep
     "g" #'magit
     ":" #'consult-mode-command
-    "Q" #'ave-buffers-kill-terminal
+    "Q" #'save-buffers-kill-terminal
 
     "f" my/file-keymap
     "p" my/project-keymap
@@ -1155,29 +1131,12 @@ Provides modern IDE features to editors
     "c" my/code-keymap
     )
 
-
-  ;; (evil-define-keymap my/leader-key-keymap
-  ;;   "My custom Evil keymap."
-  ;;   :mode evil-mode
-  ;;   :local t
-  ;;   (kbd " ") my/leader-keymap
-  ;;   )
-
-  ;; (defvar-keymap my/leader-key-minor-mode-map)
-  ;;   (define-minor-mode my/leader-key-minor-mode
-  ;; 	"A mode for my custom keybindings."
-  ;; 	:keymap my/leader-key-minor-mode-map
-  ;; 	)
-  ;;     (add-hook 'my/leader-key-minor-mode-hook (lambda () (make-local-variable 'my/leader-key-minor-mode-map)))
-  ;;     (my/leader-key-minor-mode t)
-
   (unbind-key "SPC" evil-motion-state-map)
   (bind-key "SPC" my/leader-keymap evil-motion-state-map)
-  ;; (add-hook 'lsp-mode-hook
-  ;; 	  (lambda ()
-  ;; 	    (make-local-variable 'my/leader-keymap)
-  ;; 	    (bind-key "c" my/lsp-code-keymap my/leader-keymap))
-  ;; 	  )
+
+#+end_src
+*** custom lsp keymap
+#+begin_src emacs-lisp
 
   (defun my/create-lsp-code-map ()
     (let ((my/lsp-code-keymap (define-keymap :parent my/code-keymap)))
@@ -1199,7 +1158,7 @@ Provides modern IDE features to editors
 	  (keymap-set my/lsp-code-keymap "i" #'lsp-find-implementation))
 
 	(when (lsp-feature? "textDocument/declaration")
-	  (keymap-set my/lsp-code-keymap "d" #'lsp-find-declaration))
+	  (keymap-set my/lsp-code-keymap "!" #'lsp-find-declaration))
 
 	(when (lsp-feature? "textDocument/typeDefinition")
 	  (keymap-set my/lsp-code-keymap "t" #'lsp-find-type-definition))
@@ -1233,9 +1192,8 @@ Provides modern IDE features to editors
 	(keymap-set my/lsp-code-keymap "T o" #'lsp-modeline-diagnostics-mode))
       my/lsp-code-keymap))
 
-  (add-hook 'lsp-mode-hook
+  (add-hook 'lsp-after-open-hook
 	    (lambda ()
 	      (evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
-
 
 #+end_src
