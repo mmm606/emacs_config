@@ -914,12 +914,14 @@ Provides modern IDE features to editors
 *** rings and regs keymap
 #+begin_src emacs-lisp
   
-  (defvar-keymap my/rings-and-regs-keymap)
-  (which-key-add-keymap-based-replacements my/rings-and-regs-keymap
-    "k" '("kill ring" . consult-yank-from-kill-ring)
-    "j" '("jump list" . evil-collection-consult-jump-list)
-    "s" '("reg store" . consult-register-store)
-    "r" '("registers" . consult-register))
+    (defvar-keymap my/rings-and-regs-keymap)
+    (which-key-add-keymap-based-replacements my/rings-and-regs-keymap
+      "k" '("kill ring" . consult-yank-from-kill-ring)
+      "j" '("jump list" . evil-collection-consult-jump-list)
+      "s" '("reg store" . consult-register-store)
+      "r" '("registers" . consult-register)
+      "m" '("macro" . consult-register)
+      )
 
 #+end_src
 *** buffer keymap
@@ -1097,5 +1099,12 @@ Provides modern IDE features to editors
     (add-hook 'lsp-after-open-hook
 	      (lambda ()
 		(evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
+
+#+end_src
+
+** auto close brackets
+#+begin_src emacs-lisp
+
+  (electric-pair-mode t)
 
 #+end_src
