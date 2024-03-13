@@ -1062,14 +1062,14 @@ Provides modern IDE features to editors
   ;; Toggle keybindings
   (defvar-keymap my/toggle-keymap)
   (which-key-add-keymap-based-replacements my/toggle-keymap
-    "t" '("consult theme" . consult-theme)
-    "s" '("hydra text scale" . hydra-text-scale/body)
-    "d" '("ediff" . ediff))
+    "t" '("theme" . consult-theme)
+    "s" '("text scale" . hydra-text-scale/body)
+    "d" '("diff" . ediff))
 
   ;; Insert keybindings
   (defvar-keymap my/insert-keymap)
   (which-key-add-keymap-based-replacements my/insert-keymap
-    "s" '("org insert structure template" . org-insert-structure-template))
+    "s" '("org source block" . org-insert-structure-template))
 
   (defvar-keymap my/edit-keymap)
   (which-key-add-keymap-based-replacements my/edit-keymap
@@ -1078,64 +1078,63 @@ Provides modern IDE features to editors
   ;; Error keybindings
   (defvar-keymap my/error-keymap)
   (which-key-add-keymap-based-replacements my/error-keymap
-    "/" '("consult flymake" . consult-flymake)
-    "c" '("consult compile error" . consult-compile-error))
+    "/" '("search all" . consult-flymake)
+    "c" '("compile error" . consult-compile-error))
 
   ;; Rings and Regs keybindings
   (defvar-keymap my/rings-and-regs-keymap)
   (which-key-add-keymap-based-replacements my/rings-and-regs-keymap
-    "k" '("consult yank from kill ring" . consult-yank-from-kill-ring)
-    "j" '("evil collection consult jump list" . evil-collection-consult-jump-list)
-    "s" '("consult register store" . consult-register-store)
-    "r" '("consult register" . consult-register))
+    "k" '("kill ring" . consult-yank-from-kill-ring)
+    "j" '("jump list" . evil-collection-consult-jump-list)
+    "s" '("reg store" . consult-register-store)
+    "r" '("registers" . consult-register))
 
   ;; Buffer keybindings
   (defvar-keymap my/buffer-keymap)
   (which-key-add-keymap-based-replacements my/buffer-keymap
-    "b" '("consult project buffer" . consult-project-buffer)
-    "B" '("switch to buffer" . switch-to-buffer)
+    "p" '("project buffer" . consult-project-buffer)
+    "b" '("switch buffer" . switch-to-buffer)
     "k" '("kill buffer and window" . kill-buffer-and-window)
-    "/" '("consult line multi" . consult-line-multi)
-    "I" '("consult imenu multi" . consult-imenu-multi))
+    "/" '("find in buffers" . consult-line-multi)
+    "I" '("imenu" . consult-imenu-multi))
 
   ;; Window keybindings
   (defvar-keymap my/window-keymap)
   (which-key-add-keymap-based-replacements my/window-keymap
-    "k" '("evil window up" . evil-window-up)
-    "j" '("evil window down" . evil-window-down)
-    "h" '("evil window left" . evil-window-left)
-    "l" '("evil window right" . evil-window-right)
-    "c" '("evil window delete" . evil-window-delete)
-    "C" '("delete other windows" . delete-other-windows))
+    "k" '("up" . evil-window-up)
+    "j" '("down" . evil-window-down)
+    "h" '("left" . evil-window-left)
+    "l" '("right" . evil-window-right)
+    "c" '("close" . evil-window-delete)
+    "C" '("close others" . delete-other-windows))
 
   ;; Project keybindings
   (defvar-keymap my/project-keymap)
   (which-key-add-keymap-based-replacements my/project-keymap
-    "b" '("projectile switch to buffer" . projectile-switch-to-buffer)
-    "/" '("projectile switch project" . projectile-switch-project)
-    "s" '("projectile find related file" . projectile-find-related-file))
+    "/" '("all projects" . projectile-switch-project)
+    "r" '("related file" . projectile-find-related-file))
 
   ;; File keybindings
   (defvar-keymap my/file-keymap)
   (which-key-add-keymap-based-replacements my/file-keymap
-    "p" '("my open personal config dir" . my/open-personal-config-dir)
-    "r" '("recentf open files" . recentf-open-files)
-    "/" '("projectile find file" . projectile-find-file)
-    "f" '("consult fd" . consult-fd))
+    "p" '("personal config" . my/open-personal-config-dir)
+    "r" '("recent files" . recentf-open-files)
+    "/" '("search files" . projectile-find-file)
+    "f" '("search uncached" . consult-fd))
 
   ;; Code keybindings
   (defvar-keymap my/code-keymap)
   (which-key-add-keymap-based-replacements my/code-keymap
-    "d" '("xref find definitions" . xref-find-definitions))
+    "d" '("definition" . xref-find-definitions))
 
   ;; Leader keybindings
   (defvar-keymap my/leader-keymap)
   (which-key-add-keymap-based-replacements my/leader-keymap
     "." '("find file" . find-file)
-    "/" '("consult ripgrep" . consult-ripgrep)
-    "g" '("magit" . magit)
-    ":" '("consult mode command" . consult-mode-command)
-    "Q" '("save buffers kill terminal" . save-buffers-kill-terminal)
+    "/" '("fuzzy search" . consult-ripgrep)
+    "g" '("git" . magit)
+    ":" '("mode only command" . consult-mode-command)
+    "Q" '("quit emacs" . save-buffers-kill-terminal)
     "f" `("File" . ,my/file-keymap)
     "p" `("Project" . ,my/project-keymap)
     "w" `("Window" . ,my/window-keymap)
@@ -1159,70 +1158,70 @@ Provides modern IDE features to editors
       (when (bound-and-true-p lsp-mode)
 	;; things that don't need additional conditions
 	(which-key-add-keymap-based-replacements my/lsp-code-keymap
-	  "p" '("describe thing at point (LSP)" . lsp-describe-thing-at-point)
-	  "a" '("code action (LSP)" . lsp-execute-code-action)
-	  "=" '("format buffer (LSP)" . lsp-format-buffer)
-	  "h" '("document highlight (LSP)" . lsp-document-highlight))
+	  "p" '("describe at point" . lsp-describe-thing-at-point)
+	  "a" '("code action" . lsp-execute-code-action)
+	  "=" '("format buffer" . lsp-format-buffer)
+	  "h" '("highlight" . lsp-document-highlight))
 
 	(when (lsp-feature? "textDocument/definition")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "d" '("definition (LSP)" . lsp-find-definition)))
+	    "d" '("definition" . lsp-find-definition)))
 
 	(when (lsp-feature? "textDocument/references")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "r" '("references (LSP)" . lsp-find-references)))
+	    "r" '("references" . lsp-find-references)))
 
 	(when (lsp-feature? "textDocument/implementation")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "i" '("implementation (LSP)" . lsp-find-implementation)))
+	    "i" '("implementation" . lsp-find-implementation)))
 
 	(when (lsp-feature? "textDocument/declaration")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "!" '("declaration (LSP)" . lsp-find-declaration)))
+	    "!" '("declaration" . lsp-find-declaration)))
 
 	(when (lsp-feature? "textDocument/typeDefinition")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "t" '("type definition (LSP)" . lsp-find-type-definition)))
+	    "t" '("type definition" . lsp-find-type-definition)))
 
 	(when (or (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy")
 		  (and (functionp 'lsp-treemacs-type-hierarchy)
 		       (lsp-feature? "textDocument/typeHierarchy")))
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "T" '("type hierarchy (LSP)" . lsp-treemacs-type-hierarchy)))
+	    "T" '("type hierarchy" . lsp-treemacs-type-hierarchy)))
 
 	(when (and (functionp 'lsp-treemacs-call-hierarchy)
 		   (lsp-feature? "textDocument/callHierarchy"))
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "c" '("call hierarchy (LSP)" . lsp-treemacs-call-hierarchy)))
+	    "c" '("call hierarchy" . lsp-treemacs-call-hierarchy)))
 
 	(when (lsp-feature? "textDocument/rename")
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "R" '("rename (LSP)" . lsp-rename)))
+	    "R" '("rename" . lsp-rename)))
 
 	;; Session keybindings
 	(let ((my/session-lsp-code-keymap (define-keymap)))
 	  (which-key-add-keymap-based-replacements my/session-lsp-code-keymap
-	    "l" '("workspace logs show (LSP)" . lsp-workspace-logs-show)
-	    "d" '("describe session (LSP)" . lsp-describe-session)
-	    "s" '("shutdown workspace (LSP)" . lsp-shutdown-workspace))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "S" `("Session" . ,my/session-lsp-code-keymap)))
+	    "l" '("logs" . lsp-workspace-logs-show)
+	    "d" '("describe session" . lsp-describe-session)
+	    "s" '("shutdown" . lsp-shutdown-workspace))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "S" `("Lsp Session" . ,my/session-lsp-code-keymap)))
 
 	;; Workspace folders keybindings
 	(let ((my/workspace-folders-lsp-code-keymap (define-keymap)))
 	  (which-key-add-keymap-based-replacements my/workspace-folders-lsp-code-keymap
-	    "a" '("add workspace folder (LSP)" . lsp-workspace-folders-add)
-	    "r" '("remove workspace folder (LSP)" . lsp-workspace-folders-remove)
-	    "o" '("open workspace folder (LSP)" . lsp-workspace-folders-open))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "F" `("Workspace Folders" . ,my/workspace-folders-lsp-code-keymap)))
+	    "a" '("add workspace folder" . lsp-workspace-folders-add)
+	    "r" '("remove workspace folder" . lsp-workspace-folders-remove)
+	    "o" '("open workspace folder" . lsp-workspace-folders-open))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "F" `("Lsp Workspace Folders" . ,my/workspace-folders-lsp-code-keymap)))
 
 	;; Toggle lsp features keybindings
 	(let ((my/toggle-lsp-features-code-keymap (define-keymap)))
 	  (which-key-add-keymap-based-replacements my/toggle-lsp-features-code-keymap
-	    "l" '("toggle lens (LSP)" . lsp-lens-mode)
-	    "h" '("toggle headerline breadcrumb (LSP)" . lsp-headerline-breadcrumb-mode)
-	    "a" '("toggle modeline code actions (LSP)" . lsp-modeline-code-actions-mode)
-	    "o" '("toggle modeline diagnostics (LSP)" . lsp-modeline-diagnostics-mode))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "T" `("Toggle LSP Features" . ,my/toggle-lsp-features-code-keymap)))
+	    "l" '("code lens" . lsp-lens-mode)
+	    "h" '("breadcrumb" . lsp-headerline-breadcrumb-mode)
+	    "a" '("modeline code actions" . lsp-modeline-code-actions-mode)
+	    "d" '("modeline diagnostics" . lsp-modeline-diagnostics-mode))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "T" `("Lsp Toggle Features" . ,my/toggle-lsp-features-code-keymap)))
 
 	my/lsp-code-keymap)))
 
