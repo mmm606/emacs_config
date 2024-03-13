@@ -1059,84 +1059,93 @@ Provides modern IDE features to editors
 *** default leader keymap
 #+begin_src emacs-lisp
 
-  (defvar-keymap my/toggle-keymap
-    "t" #'consult-theme
-    "s" #'hydra-text-scale/body
-    "d" #'ediff
-    )
+  ;; Toggle keybindings
+  (defvar-keymap my/toggle-keymap)
+  (which-key-add-keymap-based-replacements my/toggle-keymap
+    "t" '("consult theme" . consult-theme)
+    "s" '("hydra text scale" . hydra-text-scale/body)
+    "d" '("ediff" . ediff))
 
-  (defvar-keymap my/insert-keymap
-    "s" #'org-insert-structure-template
-    )
+  ;; Insert keybindings
+  (defvar-keymap my/insert-keymap)
+  (which-key-add-keymap-based-replacements my/insert-keymap
+    "s" '("org insert structure template" . org-insert-structure-template))
 
-  (defvar-keymap my/error-keymap
-    "/" #'consult-flymake
-    "c" #'consult-compile-error
-    )
+  (defvar-keymap my/edit-keymap)
+  (which-key-add-keymap-based-replacements my/edit-keymap
+    "t" '("transpose words" . transpose-words))
 
-  (defvar-keymap my/edit-keymap
-    "t" #'transpose-words
-    )
+  ;; Error keybindings
+  (defvar-keymap my/error-keymap)
+  (which-key-add-keymap-based-replacements my/error-keymap
+    "/" '("consult flymake" . consult-flymake)
+    "c" '("consult compile error" . consult-compile-error))
 
-  (defvar-keymap my/rings-and-regs-keymap
-    "k" #'consult-yank-from-kill-ring
-    "j" #'evil-collection-consult-jump-list
-    "s" #'consult-register-store
-    "r" #'consult-register
-    )
+  ;; Rings and Regs keybindings
+  (defvar-keymap my/rings-and-regs-keymap)
+  (which-key-add-keymap-based-replacements my/rings-and-regs-keymap
+    "k" '("consult yank from kill ring" . consult-yank-from-kill-ring)
+    "j" '("evil collection consult jump list" . evil-collection-consult-jump-list)
+    "s" '("consult register store" . consult-register-store)
+    "r" '("consult register" . consult-register))
 
-  (defvar-keymap my/buffer-keymap
-    "b" #'consult-project-buffer
-    "B" #'switch-to-buffer
-    "k" #'kill-buffer-and-window
-    "/" #'consult-line-multi
-    "I" #'consult-imenu-multi
-    )
+  ;; Buffer keybindings
+  (defvar-keymap my/buffer-keymap)
+  (which-key-add-keymap-based-replacements my/buffer-keymap
+    "b" '("consult project buffer" . consult-project-buffer)
+    "B" '("switch to buffer" . switch-to-buffer)
+    "k" '("kill buffer and window" . kill-buffer-and-window)
+    "/" '("consult line multi" . consult-line-multi)
+    "I" '("consult imenu multi" . consult-imenu-multi))
 
-  (defvar-keymap my/window-keymap
-    "k" #'evil-window-up
-    "j" #'evil-window-down
-    "h" #'evil-window-left
-    "l" #'evil-window-right
-    "c" #'evil-window-delete
-    "C" #'delete-other-windows
-    )
+  ;; Window keybindings
+  (defvar-keymap my/window-keymap)
+  (which-key-add-keymap-based-replacements my/window-keymap
+    "k" '("evil window up" . evil-window-up)
+    "j" '("evil window down" . evil-window-down)
+    "h" '("evil window left" . evil-window-left)
+    "l" '("evil window right" . evil-window-right)
+    "c" '("evil window delete" . evil-window-delete)
+    "C" '("delete other windows" . delete-other-windows))
 
-  (defvar-keymap my/project-keymap
-    "b" #'projectile-switch-to-buffer
-    "/" #'projectile-switch-project
-    "s" #'projectile-find-related-file
-    ) 
+  ;; Project keybindings
+  (defvar-keymap my/project-keymap)
+  (which-key-add-keymap-based-replacements my/project-keymap
+    "b" '("projectile switch to buffer" . projectile-switch-to-buffer)
+    "/" '("projectile switch project" . projectile-switch-project)
+    "s" '("projectile find related file" . projectile-find-related-file))
 
-  (defvar-keymap my/file-keymap
-    "p" #'my/open-personal-config-dir
-    "r" #'recentf-open-files
-    "/" #'projectile-find-file
-    "f" #'consult-fd
-    )
+  ;; File keybindings
+  (defvar-keymap my/file-keymap)
+  (which-key-add-keymap-based-replacements my/file-keymap
+    "p" '("my open personal config dir" . my/open-personal-config-dir)
+    "r" '("recentf open files" . recentf-open-files)
+    "/" '("projectile find file" . projectile-find-file)
+    "f" '("consult fd" . consult-fd))
 
-  (defvar-keymap my/code-keymap
-    "d" #'xref-find-definitions
-    ) 
+  ;; Code keybindings
+  (defvar-keymap my/code-keymap)
+  (which-key-add-keymap-based-replacements my/code-keymap
+    "d" '("xref find definitions" . xref-find-definitions))
 
-  (defvar-keymap my/leader-keymap
-    "." #'find-file
-    "/" #'consult-ripgrep
-    "g" #'magit
-    ":" #'consult-mode-command
-    "Q" #'save-buffers-kill-terminal
-
-    "f" my/file-keymap
-    "p" my/project-keymap
-    "w" my/window-keymap
-    "b" my/buffer-keymap
-    "r" my/rings-and-regs-keymap
-    "e" my/edit-keymap
-    "!" my/error-keymap
-    "i" my/insert-keymap
-    "t" my/toggle-keymap
-    "c" my/code-keymap
-    )
+  ;; Leader keybindings
+  (defvar-keymap my/leader-keymap)
+  (which-key-add-keymap-based-replacements my/leader-keymap
+    "." '("find file" . find-file)
+    "/" '("consult ripgrep" . consult-ripgrep)
+    "g" '("magit" . magit)
+    ":" '("consult mode command" . consult-mode-command)
+    "Q" '("save buffers kill terminal" . save-buffers-kill-terminal)
+    "f" `("File" . ,my/file-keymap)
+    "p" `("Project" . ,my/project-keymap)
+    "w" `("Window" . ,my/window-keymap)
+    "b" `("Buffer" . ,my/buffer-keymap)
+    "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
+    "e" `("Edit" . ,my/edit-keymap)
+    "!" `("Error" . ,my/error-keymap)
+    "i" `("Insert" . ,my/insert-keymap)
+    "t" `("Toggle" . ,my/toggle-keymap)
+    "c" `("Code" . ,my/code-keymap))
 
   (unbind-key "SPC" evil-motion-state-map)
   (bind-key "SPC" my/leader-keymap evil-motion-state-map)
