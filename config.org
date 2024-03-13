@@ -1148,59 +1148,77 @@ Provides modern IDE features to editors
   (defun my/create-lsp-code-map ()
     (let ((my/lsp-code-keymap (define-keymap :parent my/code-keymap)))
       (when (bound-and-true-p lsp-mode)
-
 	;; things that don't need additional conditions
-	(keymap-set my/lsp-code-keymap "p" #'lsp-describe-thing-at-point)
-	(keymap-set my/lsp-code-keymap "a" #'lsp-execute-code-action)
-	(keymap-set my/lsp-code-keymap "=" #'lsp-format-buffer)
-	(keymap-set my/lsp-code-keymap "h" #'lsp-document-highlight)
+	(which-key-add-keymap-based-replacements my/lsp-code-keymap
+	  "p" '("describe thing at point (LSP)" . lsp-describe-thing-at-point)
+	  "a" '("code action (LSP)" . lsp-execute-code-action)
+	  "=" '("format buffer (LSP)" . lsp-format-buffer)
+	  "h" '("document highlight (LSP)" . lsp-document-highlight))
 
 	(when (lsp-feature? "textDocument/definition")
-	  (keymap-set my/lsp-code-keymap "d" #'lsp-find-definition))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "d" '("definition (LSP)" . lsp-find-definition)))
 
 	(when (lsp-feature? "textDocument/references")
-	  (keymap-set my/lsp-code-keymap "r" #'lsp-find-references))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "r" '("references (LSP)" . lsp-find-references)))
 
 	(when (lsp-feature? "textDocument/implementation")
-	  (keymap-set my/lsp-code-keymap "i" #'lsp-find-implementation))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "i" '("implementation (LSP)" . lsp-find-implementation)))
 
 	(when (lsp-feature? "textDocument/declaration")
-	  (keymap-set my/lsp-code-keymap "!" #'lsp-find-declaration))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "!" '("declaration (LSP)" . lsp-find-declaration)))
 
 	(when (lsp-feature? "textDocument/typeDefinition")
-	  (keymap-set my/lsp-code-keymap "t" #'lsp-find-type-definition))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "t" '("type definition (LSP)" . lsp-find-type-definition)))
 
 	(when (or (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy")
 		  (and (functionp 'lsp-treemacs-type-hierarchy)
 		       (lsp-feature? "textDocument/typeHierarchy")))
-	  (keymap-set my/lsp-code-keymap "T" #'lsp-treemacs-type-hierarchy))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "T" '("type hierarchy (LSP)" . lsp-treemacs-type-hierarchy)))
 
 	(when (and (functionp 'lsp-treemacs-call-hierarchy)
 		   (lsp-feature? "textDocument/callHierarchy"))
-	  (keymap-set my/lsp-code-keymap "c" #'lsp-treemacs-call-hierarchy))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "c" '("call hierarchy (LSP)" . lsp-treemacs-call-hierarchy)))
 
 	(when (lsp-feature? "textDocument/rename")
-	  (keymap-set my/lsp-code-keymap "R" #'lsp-rename))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	    "R" '("rename (LSP)" . lsp-rename)))
 
 	;; Session keybindings
-	(keymap-set my/lsp-code-keymap "S l" #'lsp-workspace-logs-show)
-	(keymap-set my/lsp-code-keymap "S d" #'lsp-describe-session)
-	(keymap-set my/lsp-code-keymap "S s" #'lsp-shutdown-workspace)
+	(let ((my/session-lsp-code-keymap (define-keymap)))
+	  (which-key-add-keymap-based-replacements my/session-lsp-code-keymap
+	    "l" '("workspace logs show (LSP)" . lsp-workspace-logs-show)
+	    "d" '("describe session (LSP)" . lsp-describe-session)
+	    "s" '("shutdown workspace (LSP)" . lsp-shutdown-workspace))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "S" `("Session" . ,my/session-lsp-code-keymap)))
 
 	;; Workspace folders keybindings
-	(keymap-set my/lsp-code-keymap "F a" #'lsp-workspace-folders-add)
-	(keymap-set my/lsp-code-keymap "F r" #'lsp-workspace-folders-remove)
-	(keymap-set my/lsp-code-keymap "F o" #'lsp-workspace-folders-open)
+	(let ((my/workspace-folders-lsp-code-keymap (define-keymap)))
+	  (which-key-add-keymap-based-replacements my/workspace-folders-lsp-code-keymap
+	    "a" '("add workspace folder (LSP)" . lsp-workspace-folders-add)
+	    "r" '("remove workspace folder (LSP)" . lsp-workspace-folders-remove)
+	    "o" '("open workspace folder (LSP)" . lsp-workspace-folders-open))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "F" `("Workspace Folders" . ,my/workspace-folders-lsp-code-keymap)))
 
 	;; Toggle lsp features keybindings
-	(keymap-set my/lsp-code-keymap "T l" #'lsp-lens-mode)
-	(keymap-set my/lsp-code-keymap "T h" #'lsp-headerline-breadcrumb-mode)
-	(keymap-set my/lsp-code-keymap "T a" #'lsp-modeline-code-actions-mode)
-	(keymap-set my/lsp-code-keymap "T o" #'lsp-modeline-diagnostics-mode))
-      my/lsp-code-keymap))
+	(let ((my/toggle-lsp-features-code-keymap (define-keymap)))
+	  (which-key-add-keymap-based-replacements my/toggle-lsp-features-code-keymap
+	    "l" '("toggle lens (LSP)" . lsp-lens-mode)
+	    "h" '("toggle headerline breadcrumb (LSP)" . lsp-headerline-breadcrumb-mode)
+	    "a" '("toggle modeline code actions (LSP)" . lsp-modeline-code-actions-mode)
+	    "o" '("toggle modeline diagnostics (LSP)" . lsp-modeline-diagnostics-mode))
+	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "T" `("Toggle LSP Features" . ,my/toggle-lsp-features-code-keymap)))
 
-  (add-hook 'lsp-after-open-hook
-	    (lambda ()
-	      (evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
+	my/lsp-code-keymap)))
+
+    (add-hook 'lsp-after-open-hook
+	      (lambda ()
+		(evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
 
 #+end_src
