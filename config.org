@@ -451,187 +451,6 @@ Otherwise use the default `completion--in-region' function.
     ("f" nil "finished" :exit t))
 
 #+end_src
-** general
-TODO: move keybindings out of here
-TODO: figure out how to do the shadowing, creating keymaps, and buffer local shadowing with general
-#+begin_src emacs-lisp
-  ;; maybe?: (dired-current-directory &optional LOCALP)
-  (defun my/personal-config-dir ()
-    "This function will get the directory that the user's init file is in"
-    (interactive)
-    (if-let (
-	     (is-bound (boundp 'chemacs-profile))
-	     (its-assoc (assoc 'user-emacs-directory chemacs-profile))
-	     )
-	(cdr its-assoc)
-      (file-name-directory user-init-file)
-      )
-    )
-
-  (defun my/open-personal-config-dir ()
-    "This function will open the directory of the user's init file"
-    (interactive)
-    (let ((default-directory (concat (my/personal-config-dir) "/")))
-      (call-interactively 'find-file)))
-
-  (defun my/call-in-order (alist-of-func-keys-and-arg-values)
-    "This function takes an alist of key values being a function and the values being a list of args. It will try to call each one in order if and only if it is bound. If it is bound and returns a truthy value then we stop and return that value"
-    (cl-some
-     (lambda (key-value-pair)
-       (let
-	   (
-	    (func (car key-value-pair))
-	    (args (cdr key-value-pair))
-	    )
-	 (and
-	  (message "doing it")
-	  (fboundp func)
-	  (message "it was bound")
-	  (apply func args)
-	  )
-	 )
-       )
-     alist-of-func-keys-and-arg-values
-     )
-    )
-
-
-  ;; (use-package general
-  ;;   :config
-  ;;   (general-evil-setup t)
-
-  ;;   (general-create-definer rune/leader-keys
-  ;;     :keymaps '(normal insert visual emacs)
-  ;;     :prefix "SPC"
-  ;;     :global-prefix "M-SPC")
-
-  ;;   (defvar-keymap rune/no-prefix-leader-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/toggle-keymap
-  ;;     "." '(find-file :which-key "open file system")
-  ;;     "/" '(consult-ripgrep :which-key "search accross files")
-  ;;     "g" '(magit :which-key "git")
-  ;;     ":" '(consult-mode-command :which-key "only available M-x")
-  ;;     "Q" '(save-buffers-kill-terminal :which-key "quit emacs")
-  ;;     )
-
-  ;;   (defvar-keymap rune/toggle-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/toggle-keymap
-  ;;     "t" '(:ignore t :which-key "toggles")
-  ;;     "tt" '(consult-theme :which-key "choose theme")
-  ;;     "ts" '(hydra-text-scale/body :which-key "scale text")
-  ;;     "td" '(ediff :which-key "diff")
-  ;;     )
-
-  ;;   (defvar-keymap rune/insert-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/toggle-keymap
-  ;;     "s" '(org-insert-structure-template :which-key "insert source block"))
-
-  ;;   (rune/leader-keys
-  ;;     "!" '(:ignore t :which-key "errors")
-  ;;     "!/" '(consult-flymake :which-key "search errors")
-  ;;     "!c" '(consult-compile-error :which-key "to compilation error")
-  ;;     )
-
-  ;;   (rune/leader-keys
-  ;;     "e" '(:ignore t :which-key "edit")
-  ;;     "et" '(transpose-words :which-key "transpose words")
-  ;;     )
-
-  ;;   (rune/leader-keys
-  ;;     "r" '(:ignore t :which-key "regs/rings")
-  ;;     "rk" '(consult-yank-from-kill-ring :which-key "kill ring")
-  ;;     "rj" '(evil-collection-consult-jump-list :which-key "jump list")
-  ;;     "rs" '(consult-register-store :which-key "store in reg")
-  ;;     "rr" '(consult-register :which-key "registers")
-  ;;     )
-
-  ;;   (defvar-keymap rune/buffer-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/buffer-keymap
-  ;;     "b" '(:ignore t :which-key "buffer")
-  ;;     "bb" '(consult-project-buffer :which-key "switch project buffers")
-  ;;     "bB" '(switch-to-buffer :which-key "switch buffers")
-  ;;     "bk" '(kill-buffer-and-window :which-key "kill buffer")
-  ;;     "b/" '(consult-line-multi :which-key "search project buffers")
-  ;;     "bI" '(consult-imenu-multi :which-key "imenu accross project buffers")
-  ;;     )
-
-  ;;   (defvar-keymap rune/window-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/window-keymap
-  ;;     "w" '(:ignore t :which-key "window")
-  ;;     "wk" '(evil-window-up :which-key "window up")
-  ;;     "wj" '(evil-window-down :which-key "window down")
-  ;;     "wh" '(evil-window-left :which-key "window left")
-  ;;     "wl" '(evil-window-right :which-key "window right")
-  ;;     "wc" '(evil-window-delete :which-key "close window")
-  ;;     "wC" '(delete-other-windows :which-key "close all other windows"))
-
-  ;;   ;; TODO: IMPORTANT: THIS IS HOW TO BIND KEYMAPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ;;   ;; (rune/leader-keys
-  ;;   ;;   "p" '(projectile-command-map :which-key "project"))
-
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/code-keymap
-  ;;     "p" '(:ignore t :which-key "project")
-  ;;     "pb" '(projectile-switch-to-buffer :which-key "project")
-  ;;     "p/" '(projectile-switch-project :which-key "all projects")
-  ;;     "ps" '(projectile-find-related-file :which-key "switch to related file")
-  ;;     ) 
-
-  ;;   (defvar-keymap rune/lsp-code-keymap
-  ;;     "d" #'lsp-find-definition 
-  ;;     )
-
-  ;;   (defvar-keymap rune/code-keymap
-  ;;     "d" #'xref-find-definitions
-  ;;     )
-
-  ;;   (defvar-keymap rune/leader-keymap
-  ;;     "c" rune/code-keymap
-  ;;     )
-
-  ;;   (global-set-key (kbd "C-M-z") rune/leader-keymap)
-
-  ;;   (add-hook lsp-mode-hook (lambda () (which-key-add-keymap-based-replacements rune/leader-keymap "c" `("code" . ,rune/lsp-code-keymap))))
-
-  ;;   (rune/leader-keys
-  ;;     "c" `(,rune/overall-code-keymap :which-key "code")
-  ;;     )
-  ;;   ;; TODO: note: can just redefine keys set here using lsp-mode-map bc it basically has nothing in it usually
-  ;;   ;; TODO: make it so that spc c / will search for symbols and spc c C-f will do it for just this file
-
-  ;;   (defvar-keymap rune/file-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/file-keymap
-  ;;     "f" '(:ignore t :which-key "file")
-  ;;     "fp" '(my/open-personal-config-dir :which-key "personal config")
-  ;;     "fr" '(recentf-open-files :which-key "recent files")
-  ;;     "f/" '(projectile-find-file :which-key "find files")
-  ;;     ;; "ff" '(consult-fd :which-key "find files")
-  ;;     )
-
-  ;;   (defvar-keymap rune/popup-keymap)
-  ;;   (rune/leader-keys
-  ;;     ;; :keymaps 'rune/popup-keymap
-  ;;     "p" '(:ignore t :which-key "pop up")
-  ;;     "pm" '(view-echo-area-messages :which-key "view messages")
-  ;;     )
-
-  ;;   (setq my/help-map (copy-keymap help-map))
-
-  ;;   (rune/leader-keys "h" '(:keymap my/help-map :which-key "help"))
-
-  ;;   (general-define-key
-  ;;    :states '(normal visual insert emacs)
-  ;;    "C-f" '(consult-line :which-key "find in buffer")
-  ;;    "C-s" '(save-buffer :which-key "save buffer")))
-
-
-#+end_src
 ** projectile
 #+begin_src emacs-lisp
 
@@ -1049,39 +868,52 @@ Provides modern IDE features to editors
 #+end_src
 
 ** Custom keybindings
-*** non leader custom keymaps
+*** non leader key bound custom keymaps
 #+begin_src emacs-lisp
 
   (evil-global-set-key 'motion (kbd "C-f") #'consult-line)
   (evil-global-set-key 'motion (kbd "C-s") #'save-buffer)
 
 #+end_src
-*** default leader keymap
+*** toggle keymap
 #+begin_src emacs-lisp
 
-  ;; Toggle keybindings
   (defvar-keymap my/toggle-keymap)
   (which-key-add-keymap-based-replacements my/toggle-keymap
     "t" '("theme" . consult-theme)
     "s" '("text scale" . hydra-text-scale/body)
     "d" '("diff" . ediff))
 
-  ;; Insert keybindings
+#+end_src
+*** insert keymap
+#+begin_src emacs-lisp
+
   (defvar-keymap my/insert-keymap)
   (which-key-add-keymap-based-replacements my/insert-keymap
     "s" '("org source block" . org-insert-structure-template))
+
+#+end_src
+*** default leader keymap
+*** edit keymap
+#+begin_src emacs-lisp
 
   (defvar-keymap my/edit-keymap)
   (which-key-add-keymap-based-replacements my/edit-keymap
     "t" '("transpose words" . transpose-words))
 
-  ;; Error keybindings
+#+end_src
+*** error keymap
+#+begin_src emacs-lisp
+
   (defvar-keymap my/error-keymap)
   (which-key-add-keymap-based-replacements my/error-keymap
     "/" '("search all" . consult-flymake)
     "c" '("compile error" . consult-compile-error))
 
-  ;; Rings and Regs keybindings
+#+end_src
+*** rings and regs keymap
+#+begin_src emacs-lisp
+  
   (defvar-keymap my/rings-and-regs-keymap)
   (which-key-add-keymap-based-replacements my/rings-and-regs-keymap
     "k" '("kill ring" . consult-yank-from-kill-ring)
@@ -1089,7 +921,10 @@ Provides modern IDE features to editors
     "s" '("reg store" . consult-register-store)
     "r" '("registers" . consult-register))
 
-  ;; Buffer keybindings
+#+end_src
+*** buffer keymap
+#+begin_src emacs-lisp
+
   (defvar-keymap my/buffer-keymap)
   (which-key-add-keymap-based-replacements my/buffer-keymap
     "p" '("project buffer" . consult-project-buffer)
@@ -1098,7 +933,10 @@ Provides modern IDE features to editors
     "/" '("find in buffers" . consult-line-multi)
     "I" '("imenu" . consult-imenu-multi))
 
-  ;; Window keybindings
+#+end_src
+*** window keymap
+#+begin_src emacs-lisp
+  
   (defvar-keymap my/window-keymap)
   (which-key-add-keymap-based-replacements my/window-keymap
     "k" '("up" . evil-window-up)
@@ -1108,13 +946,37 @@ Provides modern IDE features to editors
     "c" '("close" . evil-window-delete)
     "C" '("close others" . delete-other-windows))
 
-  ;; Project keybindings
+#+end_src
+*** project keymap
+#+begin_src emacs-lisp
+
   (defvar-keymap my/project-keymap)
   (which-key-add-keymap-based-replacements my/project-keymap
     "/" '("all projects" . projectile-switch-project)
     "r" '("related file" . projectile-find-related-file))
 
-  ;; File keybindings
+#+end_src
+*** file keymap
+#+begin_src emacs-lisp
+
+  (defun my/personal-config-dir ()
+    "This function will get the directory that the user's init file is in"
+    (interactive)
+    (if-let (
+	     (is-bound (boundp 'chemacs-profile))
+	     (its-assoc (assoc 'user-emacs-directory chemacs-profile))
+	     )
+	(cdr its-assoc)
+      (file-name-directory user-init-file)
+      )
+    )
+
+  (defun my/open-personal-config-dir ()
+    "This function will open the directory of the user's init file"
+    (interactive)
+    (let ((default-directory (concat (my/personal-config-dir) "/")))
+      (call-interactively 'find-file)))
+
   (defvar-keymap my/file-keymap)
   (which-key-add-keymap-based-replacements my/file-keymap
     "p" '("personal config" . my/open-personal-config-dir)
@@ -1122,10 +984,17 @@ Provides modern IDE features to editors
     "/" '("search files" . projectile-find-file)
     "f" '("search uncached" . consult-fd))
 
-  ;; Code keybindings
+#+end_src
+*** code keymap
+#+begin_src emacs-lisp
+
   (defvar-keymap my/code-keymap)
   (which-key-add-keymap-based-replacements my/code-keymap
     "d" '("definition" . xref-find-definitions))
+
+#+end_src
+*** leader keymap
+#+begin_src emacs-lisp
 
   ;; Leader keybindings
   (defvar-keymap my/leader-keymap)
