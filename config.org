@@ -164,7 +164,6 @@ Vertico is a minibuffer completion framework. So when you look for files, buffer
 *** save history for completions when emacs restarts
 Vertico sorts by history position
 We also want to persist the kill ring and registers in emacs
-TODO: make it so that bookmarks are in the keymap and they get saved automatically when created, not when emacs is closed to prevent losses of bookmarks
 TODO: make it so that I can jump to a narrow list of files like harpoon
 #+begin_src emacs-lisp
 
@@ -274,17 +273,15 @@ We will rebind the default commands to the enhanced consult ones
 *** Embark
 **** what is embark?
 Embark basically allows "right click" like contextual options. It can act on consult/vertico suggestions and gives you options to do something to what you are hovering.
+It also allows you to pick the thing to act on before choosing the action.
 **** setup
-TODO: read more on the github to check for additional features
 #+begin_src emacs-lisp
   (use-package embark
-    :ensure t
-
     :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("M-." . embark-dwim)        ;; runs default action on selection
-     ("C-h B" . embark-bindings)
-     )
+    ("C-." . embark-act)         ;; pick some comfortable binding
+    ("M-." . embark-dwim)        ;; runs default action on selection
+    ("C-h B" . embark-bindings)
+    (:map embark-general-map ("y" . embark-copy-as-kill)) ;; default is on w, we don't remove that only add to it
 
     :init
     ;; Optionally replace the key help with a completing-read interface
@@ -755,7 +752,6 @@ Make the company completion box look nicer
     :hook (company-mode . company-box-mode))
 
 #+end_src
-*** TODO: Flycheck instead of flymake?
 *** Language Specific Configurations
 **** Python
 ***** set up pyright
@@ -1102,6 +1098,14 @@ Provides modern IDE features to editors
 
 #+end_src
 
+** Bookmarks
+*** save bookmarks on creation
+By default they are only saved when you exit emacs which could prevent them from being saved if emacs crashes
+#+begin_src emacs-lisp
+
+ (setq bookmark-save-flag 1) 
+
+#+end_src
 ** auto close brackets
 #+begin_src emacs-lisp
 
