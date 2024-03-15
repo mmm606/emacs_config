@@ -698,7 +698,7 @@ Built in treesitter doesn't seem to work well
       :commands lsp)
 
 #+end_src
-*** Integrate with consult
+*** integrate with consult
 TODO: https://github.com/gagbo/consult-lsp
 #+begin_src emacs-lisp
 
