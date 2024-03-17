@@ -414,6 +414,8 @@ Otherwise use the default `completion--in-region' function.
 
   (use-package which-key
     :init (which-key-mode)
+    :custom
+    which-key-show-transient-maps t
     :config
     (setq which-key-idle-delay 0.1))
 
@@ -992,6 +994,32 @@ Provides modern IDE features to editors
 
 #+end_src
 *** leader keymap
+
+here’s a generalized rule for this scenario:
+
+When you’re defining keybindings in Emacs, especially when dealing with complex conditions or multiple modes, it can be beneficial to manage these conditions at a higher level (like at the leader keymap level) rather than at the individual keybinding level. This approach can make your configuration cleaner and easier to manage.
+
+Here’s a step-by-step explanation:
+
+Define your keymaps: Create separate keymaps for each set of conditions. In your case, you might have one keymap for when LSP mode is on (lsp-on-keymap) and another for when LSP mode is off (lsp-off-keymap).
+Bind your keys: Within each keymap, bind your keys to the appropriate commands without worrying about any conditions. The keybindings in each keymap are always active, but the keymap itself will only be active under certain conditions.
+Use a conditional prefix key: Bind your prefix key (like “c” in your leader keymap) to a menu-item form with a :filter property. The :filter function should return the appropriate keymap based on your conditions. In your case, it should return lsp-on-keymap when LSP mode is on and lsp-off-keymap when LSP mode is off.
+With this approach, the conditions are managed at the prefix key level, and the individual keybindings don’t need to worry about any conditions. This can make your configuration more modular and easier to understand and maintain.
+
+Here’s a code snippet that illustrates this concept:
+
+(defvar lsp-on-keymap (make-sparse-keymap)
+  "Keymap for when LSP mode is on.")
+(define-key lsp-on-keymap (kbd "s") 'my-lsp-command)
+
+(defvar lsp-off-keymap (make-sparse-keymap)
+  "Keymap for when LSP mode is off.")
+(define-key lsp-off-keymap (kbd "t") 'my-non-lsp-command)
+
+(define-key leader-keymap (kbd "c")
+  `(menu-item "" nil :filter ,(lambda (cmd) (if (lsp-mode) lsp-on-keymap lsp-off-keymap))))
+
+In this code, “c” in the leader keymap is bound to either lsp-on-keymap or lsp-off-keymap, depending on whether LSP mode is on or off. The individual keybindings in these keymaps don’t need to worry about LSP mode; they’re always active, but their keymap is only active under the right conditions. 😊
 #+begin_src emacs-lisp
 
   ;; Leader keybindings
@@ -1015,6 +1043,57 @@ Provides modern IDE features to editors
 
   (unbind-key "SPC" evil-motion-state-map)
   (bind-key "SPC" my/leader-keymap evil-motion-state-map)
+  ;; (set-transient-map my/leader-keymap)
+
+  (defvar-keymap my/test-keymap)
+  (which-key-add-keymap-based-replacements my/test-keymap
+    "." '("find file" . find-file))
+
+  (defun my/test-prefix-command ()
+    "Choose a keymap to use as a prefix."
+    (interactive)
+    (set-transient-map my/test-keymap))
+
+  (unbind-key "C-m" evil-motion-state-map)
+  ;; (bind-key "C-m" #'my/test-prefix-command evil-motion-state-map)
+
+  (defun my-command ()
+    "Save the buffer."
+    (interactive)
+    (save-buffer))
+
+
+  (defvar my/modified-test-keymap (make-sparse-keymap)
+    "Keymap for modified buffer.")
+  (define-key my/modified-test-keymap (kbd "s")
+	      (lambda () (interactive) (message "modified")))
+
+  (defvar my/unmodified-test-keymap (make-sparse-keymap)
+    "Keymap for unmodified buffer.")
+  (define-key my/unmodified-test-keymap (kbd "t")
+	      (lambda () (interactive) (message "unmodified")))
+
+  ;;we effectively get to dynamically decide what is in this keymap by activating a keymap programatically once this keymap is active
+  (define-key evil-motion-state-map (kbd "C-m")
+	      `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+
+  ;; (defvar-keymap my/overall-test-keymap
+  ;;   `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap)))
+  ;;   (kbd "a")`(menu-item ""  (lambda () (interactive) (message "I don't care if the buffer is modified")))
+  ;;   )
+
+  ;; (define-key evil-motion-state-map (kbd "C-n") my/overall-test-keymap) 
+  ;; (defvar-keymap my/test-keymap)
+  ;;   (bind-key "C-m" my/test-keymap evil-motion-state-map)
+  ;;   (define-key my/modified-test-keymap (kbd "s")
+  ;; 	      `(menu-item "" my-command :filter ,(lambda (cmd) (if (buffer-modified-p) my/leader-keymap)) :visible ,(lambda (cmd) (if (buffer-modified-p) my/leader-keymap))))
+  ;;   ;; can use this to dynamically pick sub keymaps
+  ;;   (define-key my/modified-test-keymap (kbd "s")
+  ;; 	      `(menu-item "" my-command :filter ,(lambda (cmd) (if (buffer-modified-p) my/leader-keymap)) :visible ,(lambda (cmd) (if (buffer-modified-p) my/leader-keymap))))
+
+  ;;   (define-key my/unmodified-test-keymap (kbd "t")
+  ;; 	      `(menu-item "" my-second-command :filter ,(lambda (cmd) (if (not (buffer-modified-p)) my/leader-keymap)) :visible ,(lambda (cmd) (if (not (buffer-modified-p)) my/leader-keymap))
+  ;; ))
 
 #+end_src
 *** custom lsp keymap
@@ -1095,6 +1174,7 @@ Provides modern IDE features to editors
     (add-hook 'lsp-after-open-hook
 	      (lambda ()
 		(evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
+
 
 #+end_src
 
