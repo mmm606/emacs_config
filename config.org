@@ -1023,61 +1023,61 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
 #+begin_src emacs-lisp
 
   ;; Leader keybindings
-  (defvar-keymap my/leader-keymap)
-  (which-key-add-keymap-based-replacements my/leader-keymap
-    "." '("find file" . find-file)
-    "/" '("fuzzy search" . consult-ripgrep)
-    "g" '("git" . magit)
-    ":" '("mode only command" . consult-mode-command)
-    "Q" '("quit emacs" . save-buffers-kill-terminal)
-    "f" `("File" . ,my/file-keymap)
-    "p" `("Project" . ,my/project-keymap)
-    "w" `("Window" . ,my/window-keymap)
-    "b" `("Buffer" . ,my/buffer-keymap)
-    "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
-    "e" `("Edit" . ,my/edit-keymap)
-    "!" `("Error" . ,my/error-keymap)
-    "i" `("Insert" . ,my/insert-keymap)
-    "t" `("Toggle" . ,my/toggle-keymap)
-    "c" `("Code" . ,my/code-keymap))
+  ;; (defvar-keymap my/leader-keymap)
+  ;; (which-key-add-keymap-based-replacements my/leader-keymap
+  ;;   "." '("find file" . find-file)
+  ;;   "/" '("fuzzy search" . consult-ripgrep)
+  ;;   "g" '("git" . magit)
+  ;;   ":" '("mode only command" . consult-mode-command)
+  ;;   "Q" '("quit emacs" . save-buffers-kill-terminal)
+  ;;   "f" `("File" . ,my/file-keymap)
+  ;;   "p" `("Project" . ,my/project-keymap)
+  ;;   "w" `("Window" . ,my/window-keymap)
+  ;;   "b" `("Buffer" . ,my/buffer-keymap)
+  ;;   "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
+  ;;   "e" `("Edit" . ,my/edit-keymap)
+  ;;   "!" `("Error" . ,my/error-keymap)
+  ;;   "i" `("Insert" . ,my/insert-keymap)
+  ;;   "t" `("Toggle" . ,my/toggle-keymap)
+  ;;   "c" `("Code" . ,my/code-keymap))
 
-  (unbind-key "SPC" evil-motion-state-map)
-  (bind-key "SPC" my/leader-keymap evil-motion-state-map)
+  ;; ;; (unbind-key "SPC" evil-motion-state-map)
+  ;; (bind-key "SPC" my/leader-keymap evil-motion-state-map)
   ;; (set-transient-map my/leader-keymap)
 
-  (defvar-keymap my/test-keymap)
-  (which-key-add-keymap-based-replacements my/test-keymap
-    "." '("find file" . find-file))
+  ;; (defvar-keymap my/test-keymap)
+  ;; (which-key-add-keymap-based-replacements my/test-keymap
+  ;;   "." '("find file" . find-file))
 
-  (defun my/test-prefix-command ()
-    "Choose a keymap to use as a prefix."
-    (interactive)
-    (set-transient-map my/test-keymap))
+  ;; (defun my/test-prefix-command ()
+  ;;   "Choose a keymap to use as a prefix."
+  ;;   (interactive)
+  ;;   (set-transient-map my/test-keymap))
 
   (unbind-key "C-m" evil-motion-state-map)
   ;; (bind-key "C-m" #'my/test-prefix-command evil-motion-state-map)
 
-  (defun my-command ()
-    "Save the buffer."
-    (interactive)
-    (save-buffer))
+  ;; (defun my-command ()
+  ;;   "Save the buffer."
+  ;;   (interactive)
+  ;;   (save-buffer))
 
 
-  (defvar my/modified-test-keymap (make-sparse-keymap)
-    "Keymap for modified buffer.")
-  (define-key my/modified-test-keymap (kbd "s")
-	      (lambda () (interactive) (message "modified")))
+  ;; (defvar my/modified-test-keymap (make-sparse-keymap)
+  ;;   "Keymap for modified buffer.")
+  ;; (define-key my/modified-test-keymap (kbd "s")
+  ;; 	    (lambda () (interactive) (message "modified")))
 
-  (defvar my/unmodified-test-keymap (make-sparse-keymap)
-    "Keymap for unmodified buffer.")
-  (define-key my/unmodified-test-keymap (kbd "t")
-	      (lambda () (interactive) (message "unmodified")))
+  ;; (defvar my/unmodified-test-keymap (make-sparse-keymap)
+  ;;   "Keymap for unmodified buffer.")
+  ;; (define-key my/unmodified-test-keymap (kbd "t")
+  ;; 	    (lambda () (interactive) (message "unmodified")))
 
-  ;;we effectively get to dynamically decide what is in this keymap by activating a keymap programatically once this keymap is active
-  (define-key evil-motion-state-map (kbd "C-m")
-	      `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+  ;; ;;we effectively get to dynamically decide what is in this keymap by activating a keymap programatically once this keymap is active
+  ;; (define-key global-map (kbd "C-m")
+  ;; 	    `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
 
-  ;; (defvar-keymap my/overall-test-keymap
+  ;; ;; (defvar-keymap my/overall-test-keymap
   ;;   `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap)))
   ;;   (kbd "a")`(menu-item ""  (lambda () (interactive) (message "I don't care if the buffer is modified")))
   ;;   )
@@ -1178,6 +1178,103 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
 
 #+end_src
 
+*** custom leader minor mode
+default created keymap is `my/leader-key-mode-map`
+#+begin_src emacs-lisp
+
+  ;; alist of lsp roots containing alists of (major-mode . keymap), overall structure is (some-root . ((major-mode . keymap) ...))
+  (defvar my/leader-key-mode--active-lsp-root-alist nil)
+
+  (defmacro my/assoc-default-insert (alist key default-value)
+    "Ensure that ALIST has an entry for KEY. If not, add (KEY . DEFAULT-VALUE) to ALIST. Always return the (KEY . value) entry"
+    `(or (assoc ,key ,alist)
+	 (let ((new-entry (cons ,key ,default-value)))
+	   (push new-entry ,alist)
+	   new-entry)))
+
+  (defun my/leader-key-mode--get-keymap-for-lsp-project-and-major-mode ()
+    "Get the keymap that is associated with this lsp session's root and major mode. If lsp-mode is not enabled in this buffer, return the default code keymap"
+    (let* ((lsp-root (lsp-workspace-root))
+	   (major-mode-keymap-alist
+	    (my/assoc-default-insert my/leader-key-mode--active-lsp-root-alist lsp-root (cons major-mode (list nil))))
+	   (keymap
+	    (my/assoc-default-insert (cdr major-mode-keymap-alist) major-mode (my/create-lsp-code-map))))
+      (message "lsp root is %s" lsp-root)
+      keymap))
+
+  (defun my/leader-key-mode--filter-code-keymap (cmd)
+    "return the default code keymap if lsp-mode is off in this buffer, otherwise return the lsp code keymap. CMD is unused."
+    (message "filtering!")
+    (if lsp-mode
+	(progn
+	  (message "going to use lsp code keymap")
+	  (my/leader-key-mode--get-keymap-for-lsp-project-and-major-mode))
+      (message "Going to use regular code keymap")
+      my/code-keymap))
+
+
+  ;; (define-key global-map (kbd "C-m")
+  ;; 	    `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+  (define-minor-mode my/leader-key-mode
+    "Minor mode for my leader keybindings"
+    :global t ;; not buffer local
+    :init-value 1 ;; default should be on
+    :keymap
+    (let ((new-prefix-keymap (make-sparse-keymap)))
+      (define-key new-prefix-keymap
+		  (kbd "c") `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+      (which-key-add-keymap-based-replacements new-prefix-keymap
+	"." '("find file" . find-file)
+	"/" '("fuzzy search" . consult-ripgrep)
+	"g" '("git" . magit)
+	":" '("mode only command" . consult-mode-command)
+	"Q" '("quit emacs" . save-buffers-kill-terminal)
+	"f" `("File" . ,my/file-keymap)
+	"p" `("Project" . ,my/project-keymap)
+	"w" `("Window" . ,my/window-keymap)
+	"b" `("Buffer" . ,my/buffer-keymap)
+	"r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
+	"e" `("Edit" . ,my/edit-keymap)
+	"!" `("Error" . ,my/error-keymap)
+	"i" `("Insert" . ,my/insert-keymap)
+	"t" `("Toggle" . ,my/toggle-keymap)
+	"c" "code")
+      (let ((new-leader-keymap (make-sparse-keymap)))
+	(define-key new-leader-keymap
+		    (kbd "C-SPC") new-prefix-keymap)
+	new-leader-keymap))
+    :lighter "my-leader"
+    :interactive t
+    ;; other :keywords I define here will be just passed to defcustom along with the values I set them to
+    ;; body code, will run when mode is toggled, can just check if it is on or off
+    )
+
+  (define-key my/leader-key-mode-map (kbd "M")
+	      `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+  ;; (define-key my/leader-key-mode-map
+  ;; 	    "a" `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap))))
+  ;; (which-key-add-keymap-based-replacements my/leader-key-mode-map
+  ;;   "." '("find file" . find-file)
+  ;;   "/" '("fuzzy search" . consult-ripgrep)
+  ;;   "g" '("git" . magit)
+  ;;   ":" '("mode only command" . consult-mode-command)
+  ;;   "Q" '("quit emacs" . save-buffers-kill-terminal)
+  ;;   "f" `("File" . ,my/file-keymap)
+  ;;   "p" `("Project" . ,my/project-keymap)
+  ;;   "w" `("Window" . ,my/window-keymap)
+  ;;   "b" `("Buffer" . ,my/buffer-keymap)
+  ;;   "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
+  ;;   "e" `("Edit" . ,my/edit-keymap)
+  ;;   "!" `("Error" . ,my/error-keymap)
+  ;;   "i" `("Insert" . ,my/insert-keymap)
+  ;;   "t" `("Toggle" . ,my/toggle-keymap)
+  ;;   "c" `("Code" . menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap)))
+  ;;   )
+  ;; (defvar-keymap test-keymap
+  ;;   "a" `(menu-item "" nil :filter ,(lambda (cmd) (if (buffer-modified-p) my/modified-test-keymap my/unmodified-test-keymap)))
+  ;;   )
+
+#+end_src
 ** Bookmarks
 *** save bookmarks on creation
 By default they are only saved when you exit emacs which could prevent them from being saved if emacs crashes
