@@ -1225,26 +1225,32 @@ default created keymap is `my/leader-key-mode-map`
 	   (push new-entry ,alist)
 	   new-entry)))
 
+  ;; (macroexpand '(my/assoc-default-insert my/leader-key-mode--active-lsp-root-alist lsp-root (cons major-mode (list nil))))
+
   ;; another way to do this would just be to make a buffer local keymap that gets served by the menu, but then
   ;; we would make a duplicate keymap for every pyhton buffer in a pyton project which seems wasteful
   (defun my/leader-key-mode--get-keymap-for-lsp-project-and-major-mode ()
     "Get the keymap that is associated with this lsp session's root and major mode. If lsp-mode is not enabled in this buffer, return the default code keymap"
     (let* ((lsp-root (lsp-workspace-root))
 	   (major-mode-keymap-alist
-	    (my/assoc-default-insert my/leader-key-mode--active-lsp-root-alist lsp-root (cons major-mode (list nil))))
+	    (my/assoc-default-insert my/leader-key-mode--active-lsp-root-alist lsp-root (cons major-mode nil)))
 	   (keymap
-	    (my/assoc-default-insert (cdr major-mode-keymap-alist) major-mode (my/create-lsp-code-map))))
-      (message "lsp root is %s" lsp-root)
+	    (cdr (my/assoc-default-insert (cdr major-mode-keymap-alist) major-mode (my/create-lsp-code-map)))))
+      ;; (message "lsp root is %s" lsp-root)
+      ;; (message "major-mode-keymap-alist:")
+      ;; (prin1 major-mode-keymap-alist)
+      ;; (message "keymap:")
+      ;; (prin1 keymap)
       keymap))
 
   (defun my/leader-key-mode--filter-code-keymap (cmd)
     "return the default code keymap if lsp-mode is off in this buffer, otherwise return the lsp code keymap. CMD is unused."
-    (message "filtering!")
+    ;; (message "filtering!")
     (if lsp-mode
 	(progn
-	  (message "going to use lsp code keymap")
+	  ;; (message "going to use lsp code keymap")
 	  (my/leader-key-mode--get-keymap-for-lsp-project-and-major-mode))
-      (message "Going to use regular code keymap")
+      ;; (message "Going to use regular code keymap")
       my/code-keymap))
 
   (defvar-keymap my/leader-keymap
