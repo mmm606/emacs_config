@@ -450,6 +450,12 @@ Otherwise use the default `completion--in-region' function.
     ("f" nil "finished" :exit t))
 
 #+end_src
+** pdf viewing
+#+begin_src emacs-lisp
+
+  (setq doc-view-continuous t)
+
+#+end_src
 ** projectile
 #+begin_src emacs-lisp
 
@@ -495,6 +501,14 @@ TODO: get this going
     :config
     (setq auth-sources '("~/.authinfo")))
   ;; https://magit.vc/manual/ghub/Storing-a-Token.html
+#+end_src
+** Terminals
+*** vterm
+;; TODO: set this up: https://github.com/akermu/emacs-libvterm?tab=readme-ov-file
+#+begin_src emacs-lisp
+
+  (use-package vterm)
+
 #+end_src
 ** Org Mode
 ** make commenting easier
@@ -870,16 +884,26 @@ Provides modern IDE features to editors
 
   (evil-global-set-key 'motion (kbd "C-f") #'consult-line)
   (evil-global-set-key 'motion (kbd "C-s") #'save-buffer)
+  (keymap-set global-map "C-M-k" #'scroll-other-window)
+  (keymap-set global-map "C-M-j" #'scroll-other-window-down)
 
 #+end_src
 *** toggle keymap
 #+begin_src emacs-lisp
 
+  (defun my/open-vterm-in-split-window ()
+    "Open vterm in a new window split horizontally at the bottom."
+    (interactive)
+    (split-window-below)
+    (other-window 1)
+    (vterm))
+
   (defvar-keymap my/toggle-keymap)
   (which-key-add-keymap-based-replacements my/toggle-keymap
     "t" '("theme" . consult-theme)
     "s" '("text scale" . hydra-text-scale/body)
-    "d" '("diff" . ediff))
+    "d" '("diff" . ediff)
+    "v" '("vterm" . my/open-vterm-in-split-window))
 
 #+end_src
 *** insert keymap
