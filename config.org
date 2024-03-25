@@ -822,12 +822,11 @@ TODO: (map! :localleader
 
   (use-package tuareg
     :init
-    :hook ('tuareg-mode-hook . 
+    :hook (tuareg-mode . 
 			     (lambda()
 			       ;; more idomatic comments
 			       (setq-local comment-style 'multi-line)
 			       (setq-local comment-continue "   ")
-			       (tree-sitter)
 			       (lsp-deferred)
 			       ;; liagatures
 			       (when (functionp 'prettify-symbols-mode)
