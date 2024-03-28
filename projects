@@ -1,2 +1,3 @@
 ;;; -*- lisp-data -*-
-(("~/emacs_profiles/personal_emacs_config/"))
+(("/home/mish/emacs_profiles/personal_emacs_config/")
+ ("~/emacs_profiles/personal_emacs_config/"))

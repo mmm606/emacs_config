@@ -702,16 +702,17 @@ Built in treesitter doesn't seem to work well
 *** lsp-mode
 #+begin_src emacs-lisp
 
-    (use-package lsp-mode
-      :init
-      (setq lsp-modeline-diagnostics-enable t)
-      (setq lsp-modeline-diagnostics-scope :workspace)
-      (setq lsp-headerline-breadcrumb-mode t)
-      :custom
-      (lsp-auto-guess-root t)
-      :config
-      (lsp-enable-which-key-integration t)
-      :commands lsp)
+  (use-package lsp-mode
+    :init
+    (setq lsp-modeline-diagnostics-enable t)
+    (setq lsp-modeline-diagnostics-scope :workspace)
+    (setq lsp-headerline-breadcrumb-mode t)
+    :custom
+    (lsp-auto-guess-root t)
+    (lsp-file-watch-threshold nil)
+    :config
+    (lsp-enable-which-key-integration t)
+    :commands lsp)
 
 #+end_src
 *** integrate with consult
@@ -773,12 +774,14 @@ Make the company completion box look nicer
 ***** set up pyright
 #+begin_src emacs-lisp
 
-    (use-package lsp-pyright
-      ;; :ensure t
-      ;; :hook (python-base-mode . (lambda ()
-      ;; 				  (require 'lsp-pyright)
-      ;; 				  (lsp-deferred)))
-      )
+  (use-package lsp-pyright
+    :init
+    (setq lsp-pyright-multi-root nil)
+    ;; :ensure t
+    ;; :hook (python-base-mode . (lambda ()
+    ;; 				  (require 'lsp-pyright)
+    ;; 				  (lsp-deferred)))
+    )
 
 #+end_src
 ***** venv support
@@ -806,9 +809,11 @@ If pyvenv-mode is on then we will be able to call pyvenv-activate
 	      (erase-buffer)
 	      ))
 	  (pyvenv-mode 1)
+	  (pyvenv-tracking-mode 1)
+	  (set (make-local-variable 'pyvenv-activate) venv-dir)
 	  (pyvenv-activate venv-dir)
-	  (require 'lsp-pyright)
 	  (setq lsp-pyright-venv-path venv-dir)
+	  (require 'lsp-pyright)
 	  (lsp-deferred)
 	  (message "venv activated")
 	  )
