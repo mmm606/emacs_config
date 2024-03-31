@@ -860,7 +860,7 @@ TODO: (map! :localleader
 
 #+end_src
 ***** merlin
-Provides modern IDE features to editors
+merlin is used by ocaml-lsp in the background so you definately don't want both interfering with each other
 #+begin_src emacs-lisp
   ;; (use-package merlin-company)
   ;; (use-package merlin-iedit)
