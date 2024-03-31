@@ -786,6 +786,12 @@ Make the company completion box look nicer
 #+end_src
 ***** venv support
 If pyvenv-mode is on then we will be able to call pyvenv-activate
+Note that the pyright venv path may look wrong if you look at its value after
+starting a second python lsp-mode session and looking at its value in the original session.
+It may seem that you can only have one venv at a time but this isn't true. The variable
+=lsp-pyright-venv-path= only matters at the lsp's start up. So if pyright starts with
+this variable set to the correct thing it no longer matters what you change this variable to
+because the lsp session only looks at that at startup.
 #+begin_src emacs-lisp
 
   (defun my/create-venv-in-project-dir ()
@@ -910,18 +916,20 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 #+begin_src emacs-lisp
 
   (defun my/open-vterm-in-split-window ()
-    "Open vterm in a new window split horizontally at the bottom."
+    "Open vterm in a new window split horizontally at the bottom. Will try to be a buffer specific terminal. will close window if vterm is already open"
     (interactive)
     (split-window-below)
     (other-window 1)
-    (vterm))
+    (if (derived-mode-p 'vterm-mode)
+	(delete-window)
+      (projectile-run-vterm)))
 
   (defvar-keymap my/toggle-keymap)
   (which-key-add-keymap-based-replacements my/toggle-keymap
     "t" '("theme" . consult-theme)
     "s" '("text scale" . hydra-text-scale/body)
     "d" '("diff" . ediff)
-    "v" '("vterm" . my/open-vterm-in-split-window))
+    "t" '("vterm" . my/open-vterm-in-split-window))
 
 #+end_src
 *** insert keymap
@@ -978,14 +986,16 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 *** window keymap
 #+begin_src emacs-lisp
   
-  (defvar-keymap my/window-keymap)
-  (which-key-add-keymap-based-replacements my/window-keymap
-    "k" '("up" . evil-window-up)
-    "j" '("down" . evil-window-down)
-    "h" '("left" . evil-window-left)
-    "l" '("right" . evil-window-right)
-    "c" '("close" . evil-window-delete)
-    "C" '("close others" . delete-other-windows))
+    (defvar-keymap my/window-keymap)
+    (which-key-add-keymap-based-replacements my/window-keymap
+      "k" '("up" . evil-window-up)
+      "j" '("down" . evil-window-down)
+      "h" '("left" . evil-window-left)
+      "l" '("right" . evil-window-right)
+      "c" '("close" . evil-window-delete)
+      "C" '("close others" . delete-other-windows)
+      "v" '("vertical split" .split-window-vertically) 
+      "h" '("vertical split" .split-window-horizontally))
 
 #+end_src
 *** project keymap
@@ -1029,9 +1039,10 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 *** code keymap
 #+begin_src emacs-lisp
 
-  (defvar-keymap my/code-keymap)
-  (which-key-add-keymap-based-replacements my/code-keymap
-    "d" '("definition" . xref-find-definitions))
+    (defvar-keymap my/code-keymap)
+    (which-key-add-keymap-based-replacements my/code-keymap
+      "d" '("definition" . xref-find-definitions)
+      "r" '("references" . xref-find-references))
 
 #+end_src
 *** leader keymap
