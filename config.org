@@ -911,6 +911,14 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
   (keymap-set global-map "C-M-k" #'scroll-other-window)
   (keymap-set global-map "C-M-j" #'scroll-other-window-down)
 
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  (setq scroll-step 1) ;; keyboard scroll one line at a time
+  (evil-global-set-key 'normal (kbd "K") #'scroll-down-line)
+  (evil-global-set-key 'normal (kbd "J") #'scroll-up-line)
+  (evil-global-set-key 'visual (kbd "J") #'evil-join)
+
 #+end_src
 *** toggle keymap
 #+begin_src emacs-lisp
@@ -984,18 +992,35 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 
 #+end_src
 *** window keymap
+In the future the hydra should have keys that are more evil mode like and depend on where the window is for left and right
 #+begin_src emacs-lisp
-  
-    (defvar-keymap my/window-keymap)
-    (which-key-add-keymap-based-replacements my/window-keymap
-      "k" '("up" . evil-window-up)
-      "j" '("down" . evil-window-down)
-      "h" '("left" . evil-window-left)
-      "l" '("right" . evil-window-right)
-      "c" '("close" . evil-window-delete)
-      "C" '("close others" . delete-other-windows)
-      "v" '("vertical split" .split-window-vertically) 
-      "h" '("vertical split" .split-window-horizontally))
+
+  (defhydra my/window-resize-hydra (:hint nil)
+    ""
+    ("<left>" shrink-window-horizontally "-narrower-")
+    ("<right>" enlarge-window-horizontally "-wider-")
+    ("<down>" shrink-window "|shorter|")
+    ("<up>" enlarge-window "|longer|")
+    ("=" balance-windows "equal")
+    ("q"  nil))
+
+  (defvar-keymap my/window-keymap)
+  (which-key-add-keymap-based-replacements my/window-keymap
+    "k" '("up" . evil-window-up)
+    "j" '("down" . evil-window-down)
+    "h" '("left" . evil-window-left)
+    "l" '("right" . evil-window-right)
+    "c" '("close" . evil-window-delete)
+    "C" '("close others" . delete-other-windows)
+    "v" '("vertical split" . split-window-vertically) 
+    "s" '("sideways split" . split-window-horizontally)
+    "L" '("send right" . evil-window-move-far-right)
+    "H" '("send left" . evil-window-move-far-left)
+    "K" '("send up" . evil-window-move-very-top)
+    "J" '("send down" . evil-window-move-very-bottom)
+    "m" '("minimize emacs" . suspend-frame)
+    "s" '("text scale" . hydra-text-scale/body)
+    "r" '("resize window" . my/window-resize-hydra/body))
 
 #+end_src
 *** project keymap
@@ -1446,5 +1471,23 @@ By default they are only saved when you exit emacs which could prevent them from
 #+begin_src emacs-lisp
 
   (electric-pair-mode t)
+
+#+end_src
+
+** dired
+drag files is really cool you can choose whether you copy, move, or link depending if you hold shift meta or ctrl
+#+begin_src emacs-lisp
+
+  (setq dired-mouse-drag-files t)
+
+#+end_src
+** built in emacs non setup
+Another way to go is CUA mode that gives you the expected C-c and friends behavior of other programs.
+It also implicitly has the delete selection mode on.
+#+begin_src emacs-lisp
+
+  (pixel-scroll-precision-mode 1) ;; nicer scrolling with mouse wheel
+  (delete-selection-mode 1) ;; pasting when region is highlighted replaces it
+  (add-to-list 'default-frame-alist '(fullscreen . maximized)) ;;full screen on startup
 
 #+end_src
