@@ -1471,6 +1471,7 @@ By default they are only saved when you exit emacs which could prevent them from
 #+begin_src emacs-lisp
 
   (electric-pair-mode t)
+  (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 
 #+end_src
 
