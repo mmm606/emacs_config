@@ -98,19 +98,36 @@
 *** evil mode
 #+begin_src emacs-lisp
 
-    (use-package evil
-      :init
-      (setq evil-want-keybinding nil)
-      (setq evil-want-integration t)
-      (setq evil-want-C-i-jump nil)
-      (setq evil-want-C-d-scroll nil)
-      (setq evil-want-Y-yank-to-eol t)
-      (setq evil-undo-system 'undo-redo)
-      (setq evil-want-fine-undo t)
-      :config
-      (define-key evil-normal-state-map (kbd "C-.") nil)
-      (define-key evil-normal-state-map (kbd "M-.") nil)
-      (evil-mode 1))
+  (use-package evil
+    :init
+    (setq evil-want-keybinding nil)
+    (setq evil-want-integration t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-want-C-d-scroll nil)
+    (setq evil-want-Y-yank-to-eol t)
+    (setq evil-undo-system 'undo-redo)
+    (setq evil-want-fine-undo t)
+    :config
+    (define-key evil-normal-state-map (kbd "C-.") nil)
+    (define-key evil-normal-state-map (kbd "M-.") nil)
+    (evil-mode 1))
+
+  (defun my/evil-yank-advice (orig-fun &rest args)
+    "Print original and ending positions of point and mark."
+    (let ((orig-point (point))
+	  (orig-mark (mark))
+	  ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
+	  (orig-direction evil-visual-direction))
+      (apply orig-fun args)
+      (if (eq evil-state 'visual)
+	  (progn
+	    (evil-visual-make-region (mark) (point))
+	    (when (= orig-direction 1)
+	      (exchange-point-and-mark)))
+	(goto-char orig-point)
+	(set-mark orig-mark))))
+
+  (advice-add 'evil-yank :around #'my/evil-yank-advice)
 
 #+end_src
 *** also use evil collection
