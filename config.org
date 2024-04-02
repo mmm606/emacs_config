@@ -1353,6 +1353,34 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
 
 
 #+end_src
+**** Custom local keymaps
+***** major mode to local keymap alist and associated filter function
+#+begin_src emacs-lisp
+
+  (defvar-keymap my/default-local-leader-keymap)
+  (which-key-add-keymap-based-replacements my/default-local-leader-keymap
+    "m" `("I am empty" . ,(lambda () (interactive) (message "nothing here"))))
+
+  (defvar my/major-mode-local-leader-keymap-alist (list))
+
+  (defun my/filter-local-leader-keymap (_cmd)
+    "return the appropriate local leader keymap"
+    ;; (message "local leader filtering! %s" major-mode)
+    (alist-get major-mode my/major-mode-local-leader-keymap-alist my/default-local-leader-keymap))
+
+  (my/filter-local-leader-keymap nil)
+
+#+end_src
+***** vterm
+#+begin_src emacs-lisp
+
+  (defvar-keymap my/vterm-local-leader-keymap)
+  (which-key-add-keymap-based-replacements my/vterm-local-leader-keymap
+    "s" '("send stop" . vterm-send-stop))
+
+  (push (cons 'vterm-mode my/vterm-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
+
+#+end_src
 *** custom leader minor mode
 default created keymap is `my/leader-key-mode-map`
 #+begin_src emacs-lisp
@@ -1454,6 +1482,9 @@ default created keymap is `my/leader-key-mode-map`
   ;; using motion instead of normal here actually doesn't work
   (evil-define-minor-mode-key 'normal 'my/leader-key-mode
     (kbd "SPC") my/leader-keymap)
+
+  (evil-define-minor-mode-key 'normal 'my/leader-key-mode
+    (kbd "m") '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
 
   ;; you can have buffer local keymaps, but you need to serve them from a menu's filter function
   ;; because binding to a keymap evualtes the variable.
