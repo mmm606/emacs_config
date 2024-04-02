@@ -112,8 +112,8 @@
     (define-key evil-normal-state-map (kbd "M-.") nil)
     (evil-mode 1))
 
-  (defun my/evil-yank-advice (orig-fun &rest args)
-    "Print original and ending positions of point and mark."
+  (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
+    "Stop evil mode from unhighlighting region or moving the cursor."
     (let ((orig-point (point))
 	  (orig-mark (mark))
 	  ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
@@ -127,7 +127,8 @@
 	(goto-char orig-point)
 	(set-mark orig-mark))))
 
-  (advice-add 'evil-yank :around #'my/evil-yank-advice)
+  (advice-add 'evil-yank :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
+  (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
 
 #+end_src
 *** also use evil collection
