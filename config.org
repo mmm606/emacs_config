@@ -98,37 +98,47 @@
 *** evil mode
 #+begin_src emacs-lisp
 
-  (use-package evil
-    :init
-    (setq evil-want-keybinding nil)
-    (setq evil-want-integration t)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-want-C-d-scroll nil)
-    (setq evil-want-Y-yank-to-eol t)
-    (setq evil-undo-system 'undo-redo)
-    (setq evil-want-fine-undo t)
-    :config
-    (define-key evil-normal-state-map (kbd "C-.") nil)
-    (define-key evil-normal-state-map (kbd "M-.") nil)
-    (evil-mode 1))
+    (use-package evil
+      :init
+      (setq evil-want-keybinding nil)
+      (setq evil-want-integration t)
+      (setq evil-want-C-i-jump nil)
+      (setq evil-want-C-d-scroll nil)
+      (setq evil-want-Y-yank-to-eol t)
+      (setq evil-undo-system 'undo-redo)
+      (setq evil-want-fine-undo t)
+      :config
+      (define-key evil-normal-state-map (kbd "C-.") nil)
+      (define-key evil-normal-state-map (kbd "M-.") nil)
+      (evil-mode 1))
 
-  (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
-    "Stop evil mode from unhighlighting region or moving the cursor."
-    (let ((orig-point (point))
-	  (orig-mark (mark))
-	  ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
-	  (orig-direction evil-visual-direction))
-      (apply orig-fun args)
-      (if (eq evil-state 'visual)
-	  (progn
-	    (evil-visual-make-region (mark) (point))
-	    (when (= orig-direction 1)
-	      (exchange-point-and-mark)))
-	(goto-char orig-point)
-	(set-mark orig-mark))))
+    (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
+      "Stop evil mode from unhighlighting region or moving the cursor."
+      (let ((orig-point (point))
+	    (orig-mark (mark))
+	    ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
+	    (orig-direction evil-visual-direction))
+	(apply orig-fun args)
+	(if (eq evil-state 'visual)
+	    (progn
+	      (evil-visual-make-region (mark) (point))
+	      (when (= orig-direction 1)
+		(exchange-point-and-mark)))
+	  (goto-char orig-point)
+	  (set-mark orig-mark))))
 
-  (advice-add 'evil-yank :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
-  (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
+    (evil-define-operator my/evil-yank (beg end &optional type register yank-handler)
+      "Basically applies the `my/evil-dont-move-cursor-or-unhighlight-advice` only to yank commands that were called directly. We don't want to advice the original evil-yank because it causes trouble with evil-visual-paste"
+      (interactive "<R><x><y>")
+      ;; Call the original evil-yank
+      (my/evil-dont-move-cursor-or-unhighlight-advice 'evil-yank beg end type register yank-handler))
+
+    ;; Remap evil-yank to my-evil-yank
+    (define-key evil-motion-state-map (kbd "y") nil)
+    (define-key evil-normal-state-map (kbd "y") nil)
+    (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
+
+    (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
 
 #+end_src
 *** also use evil collection
@@ -858,9 +868,6 @@ because the lsp session only looks at that at startup.
 ***** tuareg
 Tuareg: an Emacs OCaml mode
 This archive contains files to help editing OCaml code, to highlight important parts of the code, to run an OCaml REPL (also called toplevel), and to run the OCaml debugger within Emacs.
-TODO: (map! :localleader
-:map tuareg-mode-map
-"a" #'tuareg-find-alternate-file)
 #+begin_src emacs-lisp
 
   (use-package tuareg
@@ -1368,8 +1375,6 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
     ;; (message "local leader filtering! %s" major-mode)
     (alist-get major-mode my/major-mode-local-leader-keymap-alist my/default-local-leader-keymap))
 
-  (my/filter-local-leader-keymap nil)
-
 #+end_src
 ***** vterm
 #+begin_src emacs-lisp
@@ -1379,6 +1384,16 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
     "s" '("send stop" . vterm-send-stop))
 
   (push (cons 'vterm-mode my/vterm-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
+
+#+end_src
+***** tuareg
+#+begin_src emacs-lisp
+
+  (defvar-keymap my/tuareg-local-leader-keymap)
+  (which-key-add-keymap-based-replacements my/tuareg-local-leader-keymap
+    "o" '("other ml/mli" . tuareg-find-alternate-file))
+
+  (push (cons 'tuareg-mode my/tuareg-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
 
 #+end_src
 *** custom leader minor mode
