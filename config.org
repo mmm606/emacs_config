@@ -140,20 +140,8 @@
   (define-key evil-normal-state-map (kbd "y") nil)
   (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
 
-  ;; (advice-add 'evil-yank :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
   (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
 
-
-  ;; (defun my/evil-visual-paste-move-point-back-first (orig-fun &rest args)
-  ;;   "make sure visual paste doesn't delete an extra character in front when `my/evil-dont-move-cursor-or-unhighlight-advice` is on evil-yank"
-  ;;   (message "point: %s" (point))
-  ;;   (message "mark: %s" (mark))
-  ;;   (if (= evil-visual-direction 1)
-  ;;       (goto-char (- (point) 1))
-  ;;     (set-mark (- (mark) 1)))
-  ;;   (apply orig-fun args))
-
-  ;; (advice-add 'evil-visual-paste :around #'my/evil-visual-paste-move-point-back-first)
 
 #+end_src
 *** also use evil collection
