@@ -135,7 +135,6 @@
     ;; Call the original evil-yank
     (my/evil-dont-move-cursor-or-unhighlight-advice 'evil-yank beg end type register yank-handler))
 
-  ;; Remap evil-yank to my-evil-yank
   (define-key evil-motion-state-map (kbd "y") nil)
   (define-key evil-normal-state-map (kbd "y") nil)
   (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
