@@ -110,7 +110,7 @@
     :config
     (define-key evil-normal-state-map (kbd "C-.") nil)
     (define-key evil-normal-state-map (kbd "M-.") nil)
-    (evil-mode 1))
+    (evil-mode 1)
 
   (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
     "Stop evil mode from unhighlighting region or moving the cursor."
@@ -140,7 +140,7 @@
   (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
 
   (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
-
+)
 
 #+end_src
 *** also use evil collection

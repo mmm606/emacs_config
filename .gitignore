@@ -30,3 +30,8 @@ history
 projectile-bookmarks.eld
 transient
 tree-sitter
+
+# Everything but init.el and config.org
+*
+!init.el
+!config.org
