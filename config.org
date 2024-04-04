@@ -1541,6 +1541,19 @@ By default they are only saved when you exit emacs which could prevent them from
 
 #+end_src
 
+** backup each save
+TODO: may want to clear old ones because this package doesn't do that. It is simple code so can just copy it and change stuff. 
+#+begin_src emacs-lisp
+
+  (use-package backup-each-save
+    :custom
+    (backup-each-save-mirror-location ~/backups)
+    (backup-each-save-remote-files t)
+    (backup-each-save-size-limit 10000)
+    :hook
+    (after-save . backup-each-save))
+
+#+end_src
 ** dired
 drag files is really cool you can choose whether you copy, move, or link depending if you hold shift meta or ctrl
 #+begin_src emacs-lisp

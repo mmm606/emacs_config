@@ -20,7 +20,7 @@
  '(doc-view-continuous t)
  '(doc-view-resolution 500)
  '(package-selected-packages
-   '(vterm pyvenv projectile tree-sitter-langs treesit tree-sitter merlin 0blayout which-key vertico use-package treesit-auto rainbow-delimiters python-mode org-bullets orderless nerd-icons-completion marginalia lsp-ui lsp-pyright lsp-ivy ivy-rich helpful general forge evil-nerd-commenter evil-collection embark-consult doom-themes doom-modeline dap-mode counsel-projectile company-box))
+   '(backup-each-save vterm pyvenv projectile tree-sitter-langs treesit tree-sitter merlin 0blayout which-key vertico use-package treesit-auto rainbow-delimiters python-mode org-bullets orderless nerd-icons-completion marginalia lsp-ui lsp-pyright lsp-ivy ivy-rich helpful general forge evil-nerd-commenter evil-collection embark-consult doom-themes doom-modeline dap-mode counsel-projectile company-box))
  '(which-key-show-transient-maps t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
