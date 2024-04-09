@@ -1561,6 +1561,40 @@ drag files is really cool you can choose whether you copy, move, or link dependi
   (setq dired-mouse-drag-files t)
 
 #+end_src
+** dashboard
+#+begin_src emacs-lisp
+
+  (use-package dashboard
+    :init
+    (setq dashboard-display-icons-p t)
+    (setq dashboard-icon-type 'nerd-icons)
+    (setq dashboard-center-content t)
+    (setq dashboard-vertically-center-content t)
+    (setq dashboard-show-shortcuts nil)
+    (setq dashboard-items '(
+			    (bookmarks . 5)
+			    (projects  . 5)
+			    (agenda    . 5)))
+
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+
+    (setq dashboard-startupify-list '(dashboard-insert-banner
+				      dashboard-insert-newline
+				      dashboard-insert-navigator
+				      dashboard-insert-newline
+				      dashboard-insert-init-info
+				      dashboard-insert-items))
+    (setq dashboard-startup-banner
+	  (expand-file-name "emacs-splash.svg"
+			    (my/personal-config-dir)))
+    (setq dashboard-projects-backend 'projectile)
+    :config
+    (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
+    (dashboard-setup-startup-hook))
+
+
+#+end_src
 ** built in emacs non setup
 Another way to go is CUA mode that gives you the expected C-c and friends behavior of other programs.
 It also implicitly has the delete selection mode on.

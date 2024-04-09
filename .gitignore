@@ -31,7 +31,8 @@ projectile-bookmarks.eld
 transient
 tree-sitter
 
-# Everything but init.el and config.org
+# Everything but the ones we explicitly want to include
 *
 !init.el
 !config.org
+!emacs-splash.svg
