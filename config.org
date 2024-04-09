@@ -1565,30 +1565,26 @@ drag files is really cool you can choose whether you copy, move, or link dependi
 #+begin_src emacs-lisp
 
   (use-package dashboard
-    :init
-    (setq dashboard-display-icons-p t)
-    (setq dashboard-icon-type 'nerd-icons)
-    (setq dashboard-center-content t)
-    (setq dashboard-vertically-center-content t)
-    (setq dashboard-show-shortcuts nil)
-    (setq dashboard-items '(
-			    (bookmarks . 5)
-			    (projects  . 5)
-			    (agenda    . 5)))
-
-    (setq dashboard-set-heading-icons t)
-    (setq dashboard-set-file-icons t)
-
-    (setq dashboard-startupify-list '(dashboard-insert-banner
-				      dashboard-insert-newline
-				      dashboard-insert-navigator
-				      dashboard-insert-newline
-				      dashboard-insert-init-info
-				      dashboard-insert-items))
-    (setq dashboard-startup-banner
-	  (expand-file-name "emacs-splash.svg"
-			    (my/personal-config-dir)))
-    (setq dashboard-projects-backend 'projectile)
+    :custom
+    (dashboard-display-icons-p t)
+    (dashboard-icon-type 'nerd-icons)
+    (dashboard-center-content t)
+    (dashboard-vertically-center-content t)
+    (dashboard-show-shortcuts nil)
+    (dashboard-items '((bookmarks . 5)
+		       (projects  . 5)
+		       (agenda    . 5)))
+    (dashboard-set-heading-icons t)
+    (dashboard-set-file-icons t)
+    (dashboard-startupify-list '(dashboard-insert-banner
+				 dashboard-insert-newline
+				 dashboard-insert-navigator
+				 dashboard-insert-newline
+				 dashboard-insert-init-info
+				 dashboard-insert-items))
+    (dashboard-startup-banner (expand-file-name "emacs-splash.svg"
+						(my/personal-config-dir)))
+    (dashboard-projects-backend 'projectile)
     :config
     (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name)))
     (dashboard-setup-startup-hook))
