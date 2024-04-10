@@ -730,6 +730,7 @@ Built in treesitter doesn't seem to work well
 
 #+end_src
 *** lsp-mode
+Note that the doc popup in the minibuffer is from eldoc mode
 #+begin_src emacs-lisp
 
   (use-package lsp-mode
@@ -759,8 +760,17 @@ Make the lsp interactions happen in a nice looking hovering box instead of minib
 #+begin_src emacs-lisp
 
   (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom (lsp-ui-doc-position 'at-point)
+    ;; :hook (lsp-mode . lsp-ui-mode) ;; lsp-mode is hooked into by default
+    :custom
+    (lsp-ui-doc-position 'at-point)
+    (lsp-ui-sideline-enable t)
+    (lsp-ui-sideline-show-diagnostics t)
+    ;; (lsp-ui-sideline-show-hover t)
+    (lsp-ui-sideline-show-code-actions t)
+    ;; (lsp-ui-doc-show-with-cursor t)
+    (lsp-ui-imenu-auto-refresh nil)
+    (lsp-ui-imenu-auto-refresh nil)
+    ;; (lsp-ui-imenu-auto-refresh-delay 1.0)
     )
 
 #+end_src
@@ -967,15 +977,6 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
     "t" '("vterm" . my/open-vterm-in-split-window))
 
 #+end_src
-*** insert keymap
-#+begin_src emacs-lisp
-
-  (defvar-keymap my/insert-keymap)
-  (which-key-add-keymap-based-replacements my/insert-keymap
-    "s" '("org source block" . org-insert-structure-template))
-
-#+end_src
-*** default leader keymap
 *** edit keymap
 #+begin_src emacs-lisp
 
@@ -989,7 +990,7 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 
   (defvar-keymap my/error-keymap)
   (which-key-add-keymap-based-replacements my/error-keymap
-    "/" '("search all" . consult-flymake)
+    "d" '("diagnostics" . consult-flymake)
     "c" '("compile error" . consult-compile-error))
 
 #+end_src
@@ -1002,7 +1003,7 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
       "j" '("jump list" . evil-collection-consult-jump-list)
       "s" '("reg store" . consult-register-store)
       "r" '("registers" . consult-register)
-      "m" '("macro" . consult-register)
+      ;; "m" '("macro" . consult-register)
       )
 
 #+end_src
@@ -1011,8 +1012,8 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 
   (defvar-keymap my/buffer-keymap)
   (which-key-add-keymap-based-replacements my/buffer-keymap
-    "p" '("project buffer" . consult-project-buffer)
-    "b" '("switch buffer" . switch-to-buffer)
+    "p" '("project buffers" . consult-project-buffer)
+    "b" '("buffers" . switch-to-buffer)
     "k" '("kill buffer and window" . kill-buffer-and-window)
     "/" '("find in buffers" . consult-line-multi)
     "I" '("imenu" . consult-imenu-multi))
@@ -1055,7 +1056,7 @@ In the future the hydra should have keys that are more evil mode like and depend
 
   (defvar-keymap my/project-keymap)
   (which-key-add-keymap-based-replacements my/project-keymap
-    "/" '("all projects" . projectile-switch-project)
+    "p" '("projects" . projectile-switch-project)
     "r" '("related file" . projectile-find-related-file))
 
 #+end_src
@@ -1203,85 +1204,81 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
 *** custom lsp keymap
 #+begin_src emacs-lisp
 
-  (defun my/create-lsp-code-map ()
-    (let ((my/lsp-code-keymap (define-keymap :parent my/code-keymap)))
-      (when (bound-and-true-p lsp-mode)
-	;; things that don't need additional conditions
-	(which-key-add-keymap-based-replacements my/lsp-code-keymap
-	  "p" '("describe at point" . lsp-describe-thing-at-point)
-	  "a" '("code action" . lsp-execute-code-action)
-	  "=" '("format buffer" . lsp-format-buffer)
-	  "h" '("highlight" . lsp-document-highlight))
-
-	(when (lsp-feature? "textDocument/definition")
+    (defun my/create-lsp-code-map ()
+      (let ((my/lsp-code-keymap (define-keymap :parent my/code-keymap)))
+	(when (bound-and-true-p lsp-mode)
+	  ;; things that don't need additional conditions
 	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "d" '("definition" . lsp-find-definition)))
+	    "p" '("describe at point" . lsp-describe-thing-at-point)
+	    "a" '("code action" . lsp-execute-code-action)
+	    "=" '("format buffer" . lsp-format-buffer)
+	    "l" '("highlight" . lsp-document-highlight)
+	    "h" '("hover" . lsp-ui-doc-glance)
+	    )
 
-	(when (lsp-feature? "textDocument/references")
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "r" '("references" . lsp-find-references)))
+	  (when (lsp-feature? "textDocument/definition")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "d" '("definition" . lsp-find-definition)))
 
-	(when (lsp-feature? "textDocument/implementation")
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "i" '("implementation" . lsp-find-implementation)))
+	  (when (lsp-feature? "textDocument/references")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "r" '("references" . lsp-find-references)))
 
-	(when (lsp-feature? "textDocument/declaration")
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "!" '("declaration" . lsp-find-declaration)))
+	  (when (lsp-feature? "textDocument/implementation")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "i" '("implementation" . lsp-find-implementation)))
 
-	(when (lsp-feature? "textDocument/typeDefinition")
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "t" '("type definition" . lsp-find-type-definition)))
+	  (when (lsp-feature? "textDocument/declaration")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "!" '("declaration" . lsp-find-declaration)))
 
-	(when (or (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy")
-		  (and (functionp 'lsp-treemacs-type-hierarchy)
-		       (lsp-feature? "textDocument/typeHierarchy")))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "T" '("type hierarchy" . lsp-treemacs-type-hierarchy)))
+	  (when (lsp-feature? "textDocument/typeDefinition")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "t" '("type definition" . lsp-find-type-definition)))
 
-	(when (and (functionp 'lsp-treemacs-call-hierarchy)
-		   (lsp-feature? "textDocument/callHierarchy"))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "c" '("call hierarchy" . lsp-treemacs-call-hierarchy)))
+	  (when (or (lsp-can-execute-command? "java.navigate.resolveTypeHierarchy")
+		    (and (functionp 'lsp-treemacs-type-hierarchy)
+			 (lsp-feature? "textDocument/typeHierarchy")))
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "T" '("type hierarchy" . lsp-treemacs-type-hierarchy)))
 
-	(when (lsp-feature? "textDocument/rename")
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap
-	    "R" '("rename" . lsp-rename)))
+	  (when (and (functionp 'lsp-treemacs-call-hierarchy)
+		     (lsp-feature? "textDocument/callHierarchy"))
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "c" '("call hierarchy" . lsp-treemacs-call-hierarchy)))
 
-	;; Session keybindings
-	(let ((my/session-lsp-code-keymap (define-keymap)))
-	  (which-key-add-keymap-based-replacements my/session-lsp-code-keymap
-	    "l" '("logs" . lsp-workspace-logs-show)
-	    "d" '("describe session" . lsp-describe-session)
-	    "s" '("shutdown" . lsp-shutdown-workspace))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "S" `("Lsp Session" . ,my/session-lsp-code-keymap)))
+	  (when (lsp-feature? "textDocument/rename")
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap
+	      "R" '("rename" . lsp-rename)))
 
-	;; Workspace folders keybindings
-	(let ((my/workspace-folders-lsp-code-keymap (define-keymap)))
-	  (which-key-add-keymap-based-replacements my/workspace-folders-lsp-code-keymap
-	    "a" '("add workspace folder" . lsp-workspace-folders-add)
-	    "r" '("remove workspace folder" . lsp-workspace-folders-remove)
-	    "o" '("open workspace folder" . lsp-workspace-folders-open))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "F" `("Lsp Workspace Folders" . ,my/workspace-folders-lsp-code-keymap)))
+	  ;; lsp config 
+	  (let ((my/session-lsp-code-keymap (define-keymap)))
+	    (which-key-add-keymap-based-replacements my/session-lsp-code-keymap
+	      ;; session
+	      "l" '("logs" . lsp-workspace-logs-show)
+	      "d" '("describe session" . lsp-describe-session)
+	      "s" '("shutdown" . lsp-shutdown-workspace)
 
-	;; Toggle lsp features keybindings
-	(let ((my/toggle-lsp-features-code-keymap (define-keymap)))
-	  (which-key-add-keymap-based-replacements my/toggle-lsp-features-code-keymap
-	    "l" '("code lens" . lsp-lens-mode)
-	    "h" '("breadcrumb" . lsp-headerline-breadcrumb-mode)
-	    "a" '("modeline code actions" . lsp-modeline-code-actions-mode)
-	    "d" '("modeline diagnostics" . lsp-modeline-diagnostics-mode))
-	  (which-key-add-keymap-based-replacements my/lsp-code-keymap "T" `("Lsp Toggle Features" . ,my/toggle-lsp-features-code-keymap)))
+	      ;; workspace folders
+	      "a" '("add workspace folder" . lsp-workspace-folders-add)
+	      "r" '("remove workspace folder" . lsp-workspace-folders-remove)
+	      "o" '("open workspace folder" . lsp-workspace-folders-open)
 
-	my/lsp-code-keymap)))
+	      ;; toggle
+	      "L" '("toggle code lens" . lsp-lens-mode)
+	      "H" '("toggle breadcrumb" . lsp-headerline-breadcrumb-mode)
+	      "A" '("toggle modeline code actions" . lsp-modeline-code-actions-mode)
+	      "D" '("toggle modeline diagnostics" . lsp-modeline-diagnostics-mode))
+	    (which-key-add-keymap-based-replacements my/lsp-code-keymap "L" `("Lsp Session" . ,my/session-lsp-code-keymap)))
 
-    (add-hook 'lsp-after-open-hook
-	      (lambda ()
-		(evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
+	  my/lsp-code-keymap)))
+
+    ;; (add-hook 'lsp-after-open-hook
+    ;; 	    (lambda ()
+    ;; 	      (evil-local-set-key 'motion (kbd "SPC c") (my/create-lsp-code-map))))
 
 
 #+end_src
-
 *** EPIC EXAMPLE OF DYNAMIC KEYMAPS
 #+begin_src emacs-lisp
 
@@ -1362,8 +1359,8 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
 
 
 #+end_src
-**** Custom local keymaps
-***** major mode to local keymap alist and associated filter function
+*** Custom local keymaps
+**** major mode to local keymap alist and associated filter function
 #+begin_src emacs-lisp
 
   (defvar-keymap my/default-local-leader-keymap)
@@ -1378,7 +1375,7 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
     (alist-get major-mode my/major-mode-local-leader-keymap-alist my/default-local-leader-keymap))
 
 #+end_src
-***** vterm
+**** vterm
 #+begin_src emacs-lisp
 
   (defvar-keymap my/vterm-local-leader-keymap)
@@ -1388,7 +1385,7 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
   (push (cons 'vterm-mode my/vterm-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
 
 #+end_src
-***** tuareg
+**** tuareg
 #+begin_src emacs-lisp
 
   (defvar-keymap my/tuareg-local-leader-keymap)
@@ -1396,6 +1393,16 @@ In this code, “c” in the leader keymap is bound to either lsp-on-keymap or l
     "o" '("other ml/mli" . tuareg-find-alternate-file))
 
   (push (cons 'tuareg-mode my/tuareg-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
+
+#+end_src
+**** org
+#+begin_src emacs-lisp
+
+  (defvar-keymap my/org-local-leader-keymap)
+  (which-key-add-keymap-based-replacements my/org-local-leader-keymap
+    "s" '("org source block" . org-insert-structure-template))
+
+  (push (cons 'org-mode my/org-local-leader-keymap) my/major-mode-local-leader-keymap-alist)
 
 #+end_src
 *** custom leader minor mode
@@ -1475,8 +1482,7 @@ default created keymap is `my/leader-key-mode-map`
     "b" `("Buffer" . ,my/buffer-keymap)
     "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
     "e" `("Edit" . ,my/edit-keymap)
-    "!" `("Error" . ,my/error-keymap)
-    "i" `("Insert" . ,my/insert-keymap)
+    "d" `("Diagnostics" . ,my/error-keymap)
     "t" `("Toggle" . ,my/toggle-keymap))
 
 
