@@ -1054,10 +1054,11 @@ In the future the hydra should have keys that are more evil mode like and depend
 *** project keymap
 #+begin_src emacs-lisp
 
-  (defvar-keymap my/project-keymap)
-  (which-key-add-keymap-based-replacements my/project-keymap
-    "p" '("projects" . projectile-switch-project)
-    "r" '("related file" . projectile-find-related-file))
+    (defvar-keymap my/project-keymap)
+    (which-key-add-keymap-based-replacements my/project-keymap
+      "p" '("projects" . projectile-switch-project)
+      "r" '("related file" . projectile-find-related-file)
+      "C-s" '("save proj buffers" . projectile-save-project-buffers))
 
 #+end_src
 *** file keymap
