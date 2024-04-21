@@ -980,9 +980,20 @@ merlin is used by ocaml-lsp in the background so you definately don't want both 
 *** edit keymap
 #+begin_src emacs-lisp
 
+  (defvar-keymap my/surround-keymap)
+  (which-key-add-keymap-based-replacements my/surround-keymap
+    "\"" `("\"..\"" . ,(lambda () (interactive) (insert-pair ?\" ?\")))
+    "'" `("'..'" . ,(lambda () (interactive) (insert-pair ?\' ?\')))
+    "{" `("{..}" . ,(lambda () (interactive) (insert-pair ?{ ?})))
+    "[" `("[..]" . ,(lambda () (interactive) (insert-pair ?[ ?])))
+    "(" '("(..)" . insert-parentheses)
+    )
+
   (defvar-keymap my/edit-keymap)
   (which-key-add-keymap-based-replacements my/edit-keymap
-    "t" '("transpose words" . transpose-words))
+    "t" '("transpose words" . transpose-words)
+    "s" `("surround" . ,my/surround-keymap)
+    )
 
 #+end_src
 *** error keymap
