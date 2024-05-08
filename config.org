@@ -59,6 +59,14 @@
   (setq scroll-conservatively 1000)
 
 #+end_src
+*** be able to differentiate between C-m and RET with <C-m>
+note that I am using this answer to differentiate between C-m and RET, this will only work in gui emacs: https://emacs.stackexchange.com/questions/20240/how-to-distinguish-c-m-from-return
+Use (kbd "<C-m>") to differentiate "C-m" from ret
+#+begin_src emacs-lisp
+
+  (define-key input-decode-map [?\C-m] [C-m])
+
+#+end_src
 ** Prep Package manager
 *** make sure we have melpa
 #+begin_src emacs-lisp
@@ -1524,8 +1532,8 @@ default created keymap is `my/leader-key-mode-map`
     "n" `("notes" . ,my/note-keymap)
     "t" `("Toggle" . ,my/toggle-keymap))
 
-  ;; (defvar my/filtered-local-leader-keymap-menu-item
-  ;;   '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
+  (defvar my/filtered-local-leader-keymap-menu-item
+    '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
 
   (define-minor-mode my/leader-key-mode
     "Minor mode for my leader keybindings"
@@ -1535,6 +1543,8 @@ default created keymap is `my/leader-key-mode-map`
     (let ((new-minor-mode-keymap (make-sparse-keymap)))
       (define-key new-minor-mode-keymap
 		  (kbd "C-SPC") my/leader-keymap)
+      (define-key new-minor-mode-keymap
+		  (kbd "<C-m>") my/filtered-local-leader-keymap-menu-item)
       new-minor-mode-keymap)
     :lighter "my-leader"
     :interactive t
@@ -1548,7 +1558,7 @@ default created keymap is `my/leader-key-mode-map`
     (kbd "SPC") my/leader-keymap)
 
   (evil-define-minor-mode-key 'normal 'my/leader-key-mode
-    (kbd "m") '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
+    (kbd "m") my/filtered-local-leader-keymap-menu-item)
 
   ;; ;; you can have buffer local keymaps, but you need to serve them from a menu's filter function
   ;; because binding to a keymap evualtes the variable.
