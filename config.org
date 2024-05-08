@@ -86,6 +86,22 @@
   (setq use-package-always-ensure t)
 
 #+end_src
+** custom functions needed for config
+#+begin_src emacs-lisp
+  
+  (defun my/personal-config-dir ()
+    "This function will get the directory that the user's init file is in"
+    (interactive)
+    (if-let (
+	     (is-bound (boundp 'chemacs-profile))
+	     (its-assoc (assoc 'user-emacs-directory chemacs-profile))
+	     )
+	(cdr its-assoc)
+      (file-name-directory user-init-file)
+      )
+    )
+
+#+end_src
 ** add theme
 #+begin_src emacs-lisp
 
@@ -540,7 +556,6 @@ TODO: get this going
   (use-package vterm)
 
 #+end_src
-** Org Mode
 ** make commenting easier
 #+begin_src emacs-lisp
 
@@ -548,11 +563,13 @@ TODO: get this going
     :bind ("C-/" . evilnc-comment-or-uncomment-lines))
 
 #+end_src
-*** org
-TODO: do this more
+** Org Mode
+*** org mode itself
 #+begin_src emacs-lisp
 
   (use-package org
+    :custom
+    (org-return-follows-link t)
     :config
     (setq org-ellipsis " ▾"
 	  ;; org-hide-emphasis-markers t
@@ -596,7 +613,17 @@ TODO: do this more
 
 #+end_src
 
-** Literate Config Settings
+*** org roam
+#+begin_src emacs-lisp
+
+      (use-package org-roam
+	:custom
+	(org-roam-directory (concat (my/personal-config-dir) "/roam-notes/"))
+	:config
+	(org-roam-setup))
+
+#+end_src
+*** Literate Config Settings
 Automatically tangle out our emacs.org config file when we save it:
 Disabled because we tanlge this file on startup rather than on save now
 #+begin_src emacs-lisp
@@ -1075,18 +1102,6 @@ In the future the hydra should have keys that are more evil mode like and depend
 *** file keymap
 #+begin_src emacs-lisp
 
-  (defun my/personal-config-dir ()
-    "This function will get the directory that the user's init file is in"
-    (interactive)
-    (if-let (
-	     (is-bound (boundp 'chemacs-profile))
-	     (its-assoc (assoc 'user-emacs-directory chemacs-profile))
-	     )
-	(cdr its-assoc)
-      (file-name-directory user-init-file)
-      )
-    )
-
   (defun my/open-personal-config-dir ()
     "This function will open the directory of the user's init file"
     (interactive)
@@ -1099,6 +1114,17 @@ In the future the hydra should have keys that are more evil mode like and depend
     "r" '("recent files" . recentf-open-files)
     "/" '("search files" . projectile-find-file)
     "f" '("search uncached" . consult-fd))
+
+#+end_src
+*** note keymap
+#+begin_src emacs-lisp
+
+
+  (defvar-keymap my/note-keymap)
+  (which-key-add-keymap-based-replacements my/note-keymap
+    "n" '("notes" . org-roam-buffer-toggle)
+    "/" '("search notes" . org-roam-node-find)
+    "i" '("insert roam link" . org-roam-node-insert))
 
 #+end_src
 *** code keymap
@@ -1495,8 +1521,11 @@ default created keymap is `my/leader-key-mode-map`
     "r" `("Rings and Regs" . ,my/rings-and-regs-keymap)
     "e" `("Edit" . ,my/edit-keymap)
     "d" `("Diagnostics" . ,my/error-keymap)
+    "n" `("notes" . ,my/note-keymap)
     "t" `("Toggle" . ,my/toggle-keymap))
 
+  ;; (defvar my/filtered-local-leader-keymap-menu-item
+  ;;   '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
 
   (define-minor-mode my/leader-key-mode
     "Minor mode for my leader keybindings"
@@ -1521,7 +1550,7 @@ default created keymap is `my/leader-key-mode-map`
   (evil-define-minor-mode-key 'normal 'my/leader-key-mode
     (kbd "m") '(menu-item "local-leader" nil :filter my/filter-local-leader-keymap))
 
-  ;; you can have buffer local keymaps, but you need to serve them from a menu's filter function
+  ;; ;; you can have buffer local keymaps, but you need to serve them from a menu's filter function
   ;; because binding to a keymap evualtes the variable.
   ;; (defvar-keymap my/test-keymap
   ;;   "a" (lambda () (interactive) (message "a")))
