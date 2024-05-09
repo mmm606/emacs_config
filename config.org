@@ -122,49 +122,52 @@ Use (kbd "<C-m>") to differentiate "C-m" from ret
 *** evil mode
 #+begin_src emacs-lisp
 
-  (use-package evil
-    :init
-    (setq evil-want-keybinding nil)
-    (setq evil-want-integration t)
-    (setq evil-want-C-i-jump nil)
-    (setq evil-want-C-d-scroll nil)
-    (setq evil-want-Y-yank-to-eol t)
-    (setq evil-undo-system 'undo-redo)
-    (setq evil-want-fine-undo t)
-    :config
-    (define-key evil-normal-state-map (kbd "C-.") nil)
-    (define-key evil-normal-state-map (kbd "M-.") nil)
-    (evil-mode 1)
+      (use-package evil
+	:init
+	(setq evil-want-keybinding nil)
+	(setq evil-want-integration t)
+	(setq evil-want-C-i-jump nil)
+	(setq evil-want-C-d-scroll nil)
+	(setq evil-want-Y-yank-to-eol t)
+	(setq evil-undo-system 'undo-redo)
+	(setq evil-want-fine-undo t)
+	:config
+	(define-key evil-normal-state-map (kbd "C-.") nil)
+	(define-key evil-normal-state-map (kbd "M-.") nil)
+	(define-key evil-motion-state-map (kbd "RET") nil)
+	(define-key evil-motion-state-map (kbd "SPC") nil)
+	(define-key evil-motion-state-map (kbd "TAB") nil)
+	(evil-mode 1)
 
-  (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
-    "Stop evil mode from unhighlighting region or moving the cursor."
-    (let ((orig-point (point))
-	  (orig-mark (mark))
-	  ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
-	  (orig-direction evil-visual-direction))
-      (apply orig-fun args)
-      (if (eq evil-state 'visual)
-	  (progn
-	    (evil-visual-make-region (mark) (point))
-	    (when (= orig-direction 1)
-	      (exchange-point-and-mark)))
-	(goto-char orig-point)
-	(set-mark orig-mark))))
+      (defun my/evil-dont-move-cursor-or-unhighlight-advice (orig-fun &rest args)
+	"Stop evil mode from unhighlighting region or moving the cursor."
+	(let ((orig-point (point))
+	      (orig-mark (mark))
+	      ;; note: calling (evil-visual-direction) actually doesn't give correct results so use the variable
+	      (orig-direction evil-visual-direction))
+	  (apply orig-fun args)
+	  (if (eq evil-state 'visual)
+	      (progn
+		(evil-visual-make-region (mark) (point))
+		(when (= orig-direction 1)
+		  (exchange-point-and-mark)))
+	    (goto-char orig-point)
+	    (set-mark orig-mark))))
 
-  (evil-define-operator my/evil-yank (beg end &optional type register yank-handler)
-    "Basically applies the `my/evil-dont-move-cursor-or-unhighlight-advice` only to yank commands that were called directly. We don't want to advice the original evil-yank because it causes trouble with evil-visual-paste"
-    :move-point nil
-    :repeat nil
-    (interactive "<R><x><y>")
-    ;; Call the original evil-yank
-    (my/evil-dont-move-cursor-or-unhighlight-advice 'evil-yank beg end type register yank-handler))
+      (evil-define-operator my/evil-yank (beg end &optional type register yank-handler)
+	"Basically applies the `my/evil-dont-move-cursor-or-unhighlight-advice` only to yank commands that were called directly. We don't want to advice the original evil-yank because it causes trouble with evil-visual-paste"
+	:move-point nil
+	:repeat nil
+	(interactive "<R><x><y>")
+	;; Call the original evil-yank
+	(my/evil-dont-move-cursor-or-unhighlight-advice 'evil-yank beg end type register yank-handler))
 
-  (define-key evil-motion-state-map (kbd "y") nil)
-  (define-key evil-normal-state-map (kbd "y") nil)
-  (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
+      (define-key evil-motion-state-map (kbd "y") nil)
+      (define-key evil-normal-state-map (kbd "y") nil)
+      (define-key evil-motion-state-map (kbd "y") 'my/evil-yank)
 
-  (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
-)
+      (advice-add 'evil-indent :around #'my/evil-dont-move-cursor-or-unhighlight-advice)
+    )
 
 #+end_src
 *** also use evil collection
@@ -1130,8 +1133,9 @@ In the future the hydra should have keys that are more evil mode like and depend
 
   (defvar-keymap my/note-keymap)
   (which-key-add-keymap-based-replacements my/note-keymap
-    "n" '("notes" . org-roam-buffer-toggle)
-    "/" '("search notes" . org-roam-node-find)
+    ;; "n" '("notes" . org-roam-buffer-toggle)
+    "f" '("find notes" . org-roam-node-find)
+    "c" '("capture note" . org-roam-capture)
     "i" '("insert roam link" . org-roam-node-insert))
 
 #+end_src
