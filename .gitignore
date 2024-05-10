@@ -36,3 +36,5 @@ tree-sitter
 !init.el
 !config.org
 !emacs-splash.svg
+!roam-notes
+!roam-notes/**

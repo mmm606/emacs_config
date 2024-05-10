@@ -1,0 +1,7 @@
+:PROPERTIES:
+:ID:       5a037ba8-d114-42f2-8225-d7b72e9fdcac
+:END:
+#+title: Emacs
+
+I am going to add emacs notes here
+[[id:2f214b5c-ce85-4140-87de-4fcaea054735][Emacs Lisp]]
