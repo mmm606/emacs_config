@@ -1623,11 +1623,78 @@ TODO: may want to clear old ones because this package doesn't do that. It is sim
     (after-save . backup-each-save))
 
 #+end_src
-** dired
+** File Manager
+*** dired
 drag files is really cool you can choose whether you copy, move, or link depending if you hold shift meta or ctrl
+Also affects dirvish, so good for dirvish or dired
 #+begin_src emacs-lisp
 
-  (setq dired-mouse-drag-files t)
+  (setq dired-mouse-drag-files t
+	mouse-drag-and-drop-region-cross-program t)
+
+#+end_src
+*** dirvish
+#+begin_src emacs-lisp
+
+  (use-package dirvish
+    :custom
+    (dirvish-attributes '(nerd-icons file-time file-size collapse subtree-state vc-state git-msg))
+    (dirvish-use-mode-line 'global)
+    (dirvish-use-header-line 'global)
+    (dirvish-header-line-format '(:left (path) :right (free-space)))
+    (dirvish-mode-line-format '(:left (sort symlink) :right (omit yank index)))
+    (dirvish-quick-access-entries ;; It's a custom option, `setq' won't work
+     '(("h" "~/"                          "Home")
+       ("d" "~/code/"                "Code")))
+    (delete-by-moving-to-trash t)
+    (dired-listing-switches "-l --almost-all --human-readable --group-directories-first --no-group")
+    (mouse-1-click-follows-link nil)
+    :init
+    ;; (dirvish-side-follow-mode) ;; similar to `treemacs-follow-mode'
+    (dirvish-peek-mode) ;; Preview files in minibuffer
+    (dirvish-override-dired-mode) ;; dirvish instead of dired
+
+    :bind ;; Bind `dirvish|dirvish-side|dirvish-dwim' as you see fit
+    (("C-c f" . dirvish-fd)
+     :map dirvish-mode-map ;; Dirvish inherits `dired-mode-map'
+     ("a"   . dirvish-quick-access)
+     ("f"   . dirvish-file-info-menu)
+     ("y"   . dirvish-yank-menu)
+     ("N"   . dirvish-narrow)
+     ("^"   . dirvish-history-last)
+     ("h"   . dirvish-history-jump) ;; remapped `describe-mode'
+     ("s"   . dirvish-quicksort)    ;; remapped `dired-sort-toggle-or-edit'
+     ("v"   . dirvish-vc-menu)      ;; remapped `dired-view-file'
+     ("TAB" . dirvish-subtree-toggle)
+     ("M-f" . dirvish-history-go-forward)
+     ("M-b" . dirvish-history-go-backward)
+     ("M-l" . dirvish-ls-switches-menu)
+     ("M-m" . dirvish-mark-menu)
+     ("M-t" . dirvish-layout-toggle)
+     ("M-s" . dirvish-setup-menu)
+     ("M-e" . dirvish-emerge-menu)
+     ("M-j" . dirvish-fd-jump)
+     ("<mouse-1>" . 'dirvish-subtree-toggle-or-open) ;; left click
+     ("<mouse-2>" . 'dired-mouse-find-file-other-window) ;; right click
+     ("<mouse-3>" . 'dired-mouse-find-file))) ;; middle click
+
+#+end_src
+** Remote Connections and SSH
+*** tramp
+#+begin_src emacs-lisp
+
+  ;; (use-package tramp
+  ;;   :config
+    ;; Enable full-featured Dirvish over TRAMP on certain connections
+    ;; https://www.gnu.org/software/tramp/#Improving-performance-of-asynchronous-remote-processes-1.
+    ;; (add-to-list 'tramp-connection-properties
+    ;;              (list (regexp-quote "/ssh:YOUR_HOSTNAME:")
+    ;;                    "direct-async-process" t))
+
+    ;; Tips to speed up connections
+    ;; (setq tramp-verbose 0)
+    ;; (setq tramp-chunksize 2000)
+    ;; (setq tramp-use-ssh-controlmaster-options nil))
 
 #+end_src
 ** dashboard
